@@ -31,25 +31,28 @@
         </div>
         <div class="status">
           <span id="stepCount">0 / 0</span>
-          <span id="complexity">复杂度：O(n)</span>
+          <span class="statusRow">
+            <button id="codeFab" class="codeFab" title="打开核心代码">展示代码</button>
+            <span id="complexity">复杂度：O(n)</span>
+          </span>
         </div>
       </section>
 
-      <section class="controls">
-        <button id="resetBtn" title="回到第一步">↺ 重置</button>
-        <button id="prevBtn" title="回退一步">← 上一步</button>
-        <button id="playBtn" title="自动播放">▶ 播放</button>
-        <button id="nextBtn" title="前进一步">下一步 →</button>
-        <label class="speed">速度
-          <input id="speedInput" type="range" min="250" max="1800" value="850" step="50" />
-        </label>
-      </section>
-
-      <section id="paramPanel" class="paramPanel"></section>
-
       <section class="content">
         <div class="visualPanel">
+          <div id="visualSummary" class="visualGuide visualSummary"></div>
+          <div id="visualGuide" class="visualGuide"></div>
           <div id="visual" class="visual"></div>
+          <section class="controls">
+            <button id="resetBtn" class="ghostBtn" title="回到第一步">↺ 重置</button>
+            <button id="prevBtn" class="ghostBtn" title="回退一步">← 上一步</button>
+            <button id="playBtn" class="primaryBtn" title="自动播放">▶ 播放</button>
+            <button id="nextBtn" class="accentBtn" title="前进一步">下一步 →</button>
+            <label class="speed">速度
+              <input id="speedInput" type="range" min="250" max="1800" value="850" step="50" />
+            </label>
+          </section>
+          <section id="paramPanel" class="paramPanel"></section>
         </div>
         <aside class="explainPanel">
           <h3>步骤轨迹</h3>
@@ -58,7 +61,7 @@
           <p id="stepText">选择一个算法开始。</p>
           <h3>变量状态</h3>
           <div id="stateText" class="stateText"></div>
-          <h3>答辩提示</h3>
+          <h3>学习提示</h3>
           <p id="defenseText"></p>
         </aside>
       </section>
@@ -73,7 +76,6 @@
     </main>
   </div>
 
-  <button id="codeFab" class="codeFab" title="打开核心代码">展示代码</button>
   <section id="codePanel" class="codePanel" aria-hidden="true">
     <div class="codeDialog">
       <div class="codeHeader">
@@ -83,7 +85,7 @@
           <button id="codeClose" title="关闭代码">关闭</button>
         </div>
       </div>
-      <pre id="codeBox"></pre>
+      <div id="codeBox"></div>
     </div>
   </section>
   <script src="./app.js"></script>

@@ -309,18 +309,133 @@ function renderAll() {
   $("subtitle").textContent = current.subtitle;
   $("complexity").textContent = `复杂度：${current.complexity}`;
   $("stepCount").textContent = `${stepIndex + 1} / ${steps.length}`;
+  updateStepButtons();
   document.querySelectorAll(".algoBtn").forEach(b => b.classList.toggle("active", b.dataset.id === current.id));
   const step = steps[stepIndex] || {};
+  $("visualSummary").innerHTML = renderVisualSummary(current);
+  $("visualGuide").innerHTML = renderVisualGuide(current, step);
   renderStepHistory();
   $("stepText").textContent = step.text || "";
-  $("defenseText").textContent = step.defense || "答辩时先说算法目标，再说核心变量，再说每一步如何推进。";
+  $("defenseText").textContent = step.defense || "学习时先看算法目标，再看核心变量，最后看每一步如何推进。";
   $("stateText").innerHTML = Object.entries(step.state || {}).map(([k, v]) => `<div class="stateItem"><b>${k}</b>：${v}</div>`).join("");
   $("visual").innerHTML = "";
-  current.render($("visual"), step, stepIndex);
   const visualPanel = document.querySelector(".visualPanel");
+  if (visualPanel) {
+    const largeVisuals = new Set(["fact", "hanoi", "sequential", "binary", "block", "merge", "counting", "radix", "bucket", "hash", "floyd", "topo"]);
+    visualPanel.dataset.algo = current.id;
+    visualPanel.dataset.scale = largeVisuals.has(current.id) ? "large" : "normal";
+  }
+  current.render($("visual"), step, stepIndex);
   if (visualPanel) visualPanel.scrollTop = 0;
   renderCode(current.code, step.lines || []);
   renderKnowledge();
+}
+
+function renderVisualGuide(algo, step) {
+  const guide = getVisualGuide(algo, step);
+  return `<b>看图指南：</b>${escapeHtml(guide)}`;
+}
+
+function renderVisualSummary(algo) {
+  return `<b>解析：</b>${escapeHtml(getAlgorithmSummary(algo))}`;
+}
+
+function getAlgorithmSummary(algo) {
+  const byId = {
+    fact: "阶乘递归把 Fact(n) 拆成 n * Fact(n-1)，所以每次调用都必须让 n 变小。看到 Fact(0)=1 时递归停止，之后结果会沿调用栈一层层返回。",
+    hanoi: "汉诺塔的关键不是乱试移动，而是把“大问题”拆成三步：先挪开 n-1 个小盘，移动最大盘，再把 n-1 个小盘挪回来。动画每一步都在执行这个固定套路。",
+    traversal: "三序遍历访问的是同一棵树，区别只在“什么时候记录根结点”。根先被记录是先序，夹在左右子树中间是中序，左右子树都处理完再记录是后序。",
+    heightCount: "求高度、结点数、叶子数都可以递归完成，因为一棵树可以分成根、左子树、右子树。高度取左右较大值加 1，结点数左右相加再加根，叶子数只在没有孩子时计 1。",
+    buildTree: "递归建树通常按文件或数组的顺序读结点。本题读到一行就创建当前结点，左/右标志为 1 才继续递归创建对应孩子；标志为 0 就说明该方向为空。",
+    treeArray: "二叉链表转顺序存储时，要把指针关系翻译成数组下标关系。根放 1，左孩子放 2*i，右孩子放 2*i+1；这样即使某些位置为空，也能保留树的形状。",
+    relation: "父、兄弟、孩子查询本质都是围绕指针关系找位置。孩子直接看目标结点左右指针，父结点要从根开始找谁指向目标，兄弟则是找到父亲后看另一个孩子。",
+    lca: "最近共同祖先是两个结点路径第一次汇合的位置。递归查找时，如果当前结点左子树找到一个目标、右子树也找到一个目标，当前结点就是最近的共同祖先。",
+    leafPath: "叶子到根路径通常先在递归下行时记录根到叶的 path。到达叶子后，path 里已经保存完整路径；题目若要求叶到根，只需要把 path 反向输出。",
+    childSibling: "孩子兄弟表示法把普通树改造成“向下找第一个孩子、向右找下一个兄弟”的结构。求某个结点的度时，不是看左右孩子，而是沿 firstChild 后的兄弟链数有几个孩子。",
+    matrix: "邻接矩阵用二维数组表示图中任意两点是否相连。无向边 a-b 必须同时写 edge[a][b] 和 edge[b][a]，统计边数时只看右上三角，避免同一条边被算两次。",
+    adjList: "邻接表给每个顶点准备一个邻居名单，只保存真实存在的边。边少时它比矩阵省空间；无向图中一条边会出现在两个顶点的邻居名单里。",
+    dfs: "DFS 深度优先搜索像走迷宫：遇到没访问过的邻居就马上深入，直到走不动再回退。visited 用来防止在有环图里无限绕圈，递归调用栈保存当前路径。",
+    bfs: "BFS 广度优先搜索按层推进：先访问起点，再访问一圈邻居，再访问邻居的邻居。队列保证先进先出，所以无权图中第一次到达某点时，路径层数就是最短的。",
+    prim: "Prim 用“点集合扩张”的思想找最小生成树。它始终维护一批已选顶点，每次从连接内外两个集合的边里挑最短的一条，把新的顶点纳入生成树。",
+    kruskal: "Kruskal 从边的角度出发，把所有边按权值从小到大尝试加入。只要加入后不会形成环，这条边就保留；最终选出 n-1 条边时得到最小生成树。",
+    topo: "拓扑排序处理的是有先后依赖的有向无环图。入度为 0 的点表示没有前置条件，可以先输出；输出它后删除出边，新的入度为 0 的点继续进入队列。",
+    dijkstra: "Dijkstra 用 dist 数组记录从起点到各点的当前最短距离。每轮选出未确定点里 dist 最小的点固定下来，再用它更新邻居；它适用于非负权图。",
+    floyd: "Floyd 求任意两点最短路，核心是允许越来越多的中转点。枚举 k 时，检查 i 到 j 如果经过 k 是否更短，若更短就更新距离矩阵 D[i][j]。",
+    sequential: "顺序查找不依赖数据是否有序，方法就是从头到尾逐个比较。它简单但效率低，最坏情况下要看完整个表；动画中的高亮格就是当前比较对象。",
+    binary: "二分查找必须建立在有序数组上。每次取中间位置 mid 比较，目标更大就丢掉左半边，目标更小就丢掉右半边，因此查找范围会快速缩小。",
+    block: "分块查找把数据分成若干块，并用索引表记录每块的范围。先通过索引判断目标可能在哪一块，再进入块内顺序查找，是顺序查找和二分思想的折中。",
+    bst: "BST 二叉排序树要求左子树都比根小，右子树都比根大。查找或插入时每到一个结点只需决定向左还是向右，直到找到目标或遇到空位置。",
+    avl: "AVL 是带平衡要求的 BST。插入先按 BST 规则进行，之后沿路径回看高度差；若某个结点左右高度差超过 1，就通过旋转把树重新变矮、变平衡。",
+    hash: "哈希表用函数把关键字直接映射到数组位置，理想情况下接近 O(1)。如果不同关键字算到同一格就发生冲突，需要用线性探测或链地址法继续存放。",
+    insertion: "直接插入排序把左边维护成有序区。每轮取出右边第一个元素 temp，把有序区中比它大的元素依次右移，最后把 temp 插入空出来的位置。",
+    shell: "希尔排序是改进版插入排序。它先用较大的 gap 让远距离元素提前移动，数组逐渐接近有序；当 gap 缩小到 1 时，再做一次普通插入排序完成收尾。",
+    bubble: "冒泡排序每次只比较相邻两个元素，逆序就交换。经过一趟扫描，未排序区最大值会一路被交换到最右端，所以右侧会逐步形成有序区。",
+    quick: "快速排序先选一个 pivot，把小的放左边、大的放右边，使 pivot 找到最终位置。然后左右两边再递归做同样的事，平均情况下速度很快。",
+    selection: "直接选择排序每一趟都在未排序区寻找最小值。找到后把它交换到未排序区最前面，因此前面的有序区会一个位置一个位置地扩大。",
+    heap: "堆排序把数组看成完全二叉树，并调整成大根堆。堆顶总是当前最大值，每轮把堆顶交换到末尾，再对剩余部分重新下滤成堆。",
+    merge: "归并排序的合并阶段面对两个已经有序的子表。每次比较两个表头，把较小者放入结果表；一边用完后，把另一边剩余元素整体接上。",
+    counting: "计数排序适合取值范围不大的整数。它不做两两比较，而是用 count[value] 统计每个值出现几次，再按值从小到大输出对应次数。",
+    radix: "基数排序把多位数拆成个位、十位、百位等逐位处理。每一趟按当前位分桶并稳定收集，低位顺序才不会被高位处理破坏。",
+    bucket: "桶排序先按数值范围把元素分到不同桶中，让每个桶只处理一小段数据。桶内排序后按桶顺序拼接，如果数据分布均匀，整体效率会很好。"
+  };
+  const byGroup = {
+    "递归": "判断递归题：先找出口，再看规模是否变小，最后看返回值如何合并。",
+    "实验四：二叉树与树": "判断树题：先明确当前结点，再看左子树和右子树分别如何递归处理。",
+    "图": "判断图题：先确定存储结构，再看边、visited、栈/队列或集合如何变化。",
+    "最短路径": "判断路径题：核心是距离数组或距离矩阵什么时候被更新。",
+    "查找": "判断查找题：先看数据是否有序，再决定顺序查、二分、树查还是哈希。",
+    "排序": "判断排序题：先看每一趟确定哪个位置或区间，再看比较/移动/交换规则。"
+  };
+  return byId[algo.id] || byGroup[algo.group] || `判断 ${algo.title}：抓住核心变量如何变化。`;
+}
+
+function getVisualGuide(algo, step) {
+  const byId = {
+    fact: "左侧展示的是递归调用栈。每点下一步，就相当于函数继续调用或开始返回；栈越长表示递归钻得越深，命中出口后才会一层层算回结果。",
+    hanoi: "三根柱子表示 A、B、C，数字越大盘子越大。每一步只移动一个盘，目标是把所有盘从起点搬到目标柱，同时始终保持大盘不能压在小盘上。",
+    traversal: "同一棵四层二叉树会被按先序、中序、后序访问。高亮结点是当前访问位置，下方输出会不断追加；区别只在 visit 当前根结点的时机。",
+    heightCount: "这张图不是在改变树，而是在说明同一棵树可以计算不同指标：高度看最长路径，结点数看所有结点，叶子数只看没有孩子的结点。",
+    buildTree: "这张图在模拟从文件逐行建树：下方每个小格是一行输入，1 表示还要递归创建对应子树；高亮边表示这一步把新结点挂到父结点下面。",
+    treeArray: "树上的结点会被放进下方数组。根结点放在 1 号位，左孩子放 2*i，右孩子放 2*i+1；看图时重点观察树位置和数组下标如何对应。",
+    relation: "这张图在围绕目标结点 B 查询亲属关系：父结点要从根往下找，兄弟来自同一个父结点的另一个孩子，孩子直接看 B 的左右指针。",
+    lca: "LCA 的目标是找两个结点第一次汇合的祖先。看图时观察 H 和 K 分别从左右子树返回，某个结点左右两边都找到目标时，它就是最近共同祖先。",
+    leafPath: "高亮路径表示递归当前走过的根到叶路径。到达叶子后，path 数组里保存的是从根到叶；题目要求叶子到根时，就反向输出这条路径。",
+    childSibling: "这不是普通二叉树左右孩子图。firstChild 指针向下找到第一个孩子，nextSibling 指针向右串起兄弟；沿兄弟链数孩子个数，就能求树的度。",
+    matrix: "矩阵第 i 行第 j 列表示顶点 i 和 j 是否有边。无向边要同时写两个对称位置；统计边数时只看右上三角，避免同一条边被重复数两次。",
+    adjList: "每一行表示一个顶点的邻居名单。邻接表不画不存在的边，只把真正相连的顶点放进列表，所以它比矩阵更适合边比较少的图。",
+    dfs: "DFS 像走迷宫：从当前点优先继续往深处走，走到不能走再回退。看图时重点盯住递归栈，它表示当前还没有完全返回的路径。",
+    bfs: "BFS 像水波纹：先处理起点，再处理第一圈邻居，再处理第二圈邻居。看图时重点盯住队列，先进队的顶点会先被处理。",
+    prim: "Prim 从一个已选顶点集合开始，每一步只在“已选集合”和“未选顶点”之间挑最短边。高亮边表示被加入最小生成树的边。",
+    kruskal: "Kruskal 不从某个点出发，而是把边按权值从小到大试选。每一步如果加入这条边不会形成环，就把它放进最小生成树。",
+    topo: "拓扑排序只适用于有向无环图。每一步选择入度为 0 的点输出，并删除它的出边；如果最后还有点输出不了，就说明图里有环。",
+    dijkstra: "Dijkstra 每一步固定一个当前距离最短的顶点，再用它尝试更新邻居距离。看下方 dist 数组：被固定的点不会再改变。",
+    floyd: "Floyd 看的是距离矩阵。每一轮允许一个新顶点 k 当中转站，检查 i 到 j 经过 k 会不会更短；变短就更新矩阵里的距离。",
+    sequential: "顺序查找没有技巧，就是从左到右逐个比较。高亮位置是当前正在比的元素，找到目标就返回下标，找完都没有就是失败。",
+    binary: "二分查找必须在有序数组上进行。每次比较 mid 后会排除一半区间；变灰的格子表示已经不可能包含目标。",
+    block: "分块查找先看索引表确定目标可能在哪一块，再在块内顺序查找。它介于顺序查找和二分查找之间，适合块间有序、块内无序的数据。",
+    bst: "BST 遵守小走左、大走右。查找和插入时每一步只会选择一个方向，另一整棵子树会被排除；新插入的结点最终一定挂在叶子位置。",
+    avl: "AVL 先按 BST 规则插入，再检查高度和平衡因子。若某个结点左右高度差超过 1，就通过旋转把树重新调整平衡。",
+    hash: "哈希表先用哈希函数算位置。若目标格已经被占，就按冲突处理规则继续找位置；本演示用线性探测展示冲突如何被解决。",
+    insertion: "插入排序把左边看成有序区。每轮取一个新元素 temp，把有序区里比 temp 大的元素右移，最后把 temp 插到空位。",
+    shell: "希尔排序是分组插入排序。gap 大时元素可以跨很远移动，gap 逐渐缩小到 1 后，最后一次就是普通插入排序。",
+    bubble: "冒泡排序每次比较相邻元素，逆序就交换。一趟结束后，当前未排序区最大的元素会被推到最右边。",
+    quick: "快速排序一趟划分会选一个 pivot。左右指针交替寻找不合适的元素并移动，最终 pivot 归位，左边都不大于它，右边都不小于它。",
+    selection: "选择排序每一趟在未排序区找最小值，把它交换到未排序区最前面。看图时重点关注 min 指针如何更新。",
+    heap: "堆排序先把数组看成完全二叉树并调整成大根堆。堆顶是最大值，每轮把堆顶换到右侧已排序区，再对剩余堆下滤调整。",
+    merge: "归并排序的合并过程会同时看两个有序子表的表头。谁更小就先放进结果表，直到一边为空，再接上另一边剩余元素。",
+    counting: "计数排序不比较大小，而是统计每个值出现了几次。count 数组记录频率，再按值从小到大输出对应次数。",
+    radix: "基数排序按位分桶：先按个位，再按十位。每一轮都要稳定收集，才能保证低位已经排好的相对顺序不被破坏。",
+    bucket: "桶排序先按数值范围把元素分到不同桶里，再对桶内排序，最后按桶顺序拼接。数据分布越均匀，效果越好。"
+  };
+  const byGroup = {
+    "递归": "这张图展示递归拆解和回收结果的过程。看图时先找递归出口，再看当前问题怎样变成更小的问题。",
+    "实验四：二叉树与树": "这张图围绕二叉树指针、递归和路径变化展开。高亮表示当前处理的结点，已变绿表示已经处理过。",
+    "图": "这张图展示图的存储或遍历。重点看顶点、边、visited 标记，以及当前数据结构是矩阵、邻接表、栈还是队列。",
+    "最短路径": "这张图展示距离如何被一步步更新。重点看当前固定的点、中转点或 dist 数组的变化。",
+    "查找": "这张图展示查找范围如何缩小。高亮表示当前比较位置，灰色或排除区表示已经不可能成为答案。",
+    "排序": "这张图展示数组如何逐步变有序。高亮表示正在比较或移动的元素，绿色表示已经确定位置或已经有序。"
+  };
+  return byId[algo.id] || byGroup[algo.group] || `本图演示 ${algo.title} 的执行过程。高亮部分表示当前步骤正在处理的位置，右侧步骤会解释为什么这样做。`;
 }
 
 function renderStepHistory() {
@@ -446,9 +561,79 @@ function renderParams() {
 function renderCode(src, hotLines) {
   const hot = new Set(hotLines);
   $("codeBox").innerHTML = src.split("\n").map((line, i) => {
-    const cls = hot.has(i + 1) ? "codeLine hot" : "codeLine";
-    return `<span class="${cls}">${escapeHtml(line)}</span>`;
+    const note = explainCodeLine(line, current);
+    const cls = `${hot.has(i + 1) ? "codeLine hot" : "codeLine"}${note ? "" : " simple"}`;
+    if (!note) {
+      return `<div class="${cls}"><div class="codeText">${escapeHtml(line || " ")}</div></div>`;
+    }
+    return `<div class="${cls}">
+      <div class="codeText">${escapeHtml(line || " ")}</div>
+      <div class="codeExplain"><b>语法：</b>${escapeHtml(note.syntax)}<br><b class="role">作用：</b>${escapeHtml(note.role)}</div>
+    </div>`;
   }).join("");
+}
+
+function explainCodeLine(line, algo) {
+  const raw = line;
+  const s = line.trim();
+  const lower = s.toLowerCase();
+  const family = algo?.group || "";
+  const title = algo?.title || "当前算法";
+  if (isLowInfoCodeLine(s)) return null;
+  if (lower.startsWith("//")) return { syntax: "`//` 是单行注释，编译器不会执行它。", role: "这行是给人看的说明，用来解释指针、变量或算法约定。" };
+  if (/^struct\b/.test(s)) return { syntax: "`struct` 定义结构体，相当于自定义一种数据类型。", role: "把一个结点需要保存的数据和指针打包在一起，后面才能用它表示树、链表或图的结点。" };
+  if (/^(void|int|bool|node\*|binode\*|csnode\*|elem)/i.test(s) && s.includes("(")) {
+    const name = (s.match(/([A-Za-z_]\w*)\s*\(/) || [,"函数"])[1];
+    return { syntax: "这是函数定义：最前面是返回类型，中间是函数名，括号里是参数。`*` 表示指针，`&` 表示引用传参。", role: `${name} 是 ${title} 的核心过程；调用它时，程序会带着参数进入这段算法逻辑。` };
+  }
+  if (/^(int|bool|elem|node\*|binode\*|csnode\*|queue<|vector<)/i.test(s)) {
+    if (s.includes("=")) return { syntax: "这是变量定义并初始化：左边声明变量类型和名字，右边给它一个初始值。", role: "先准备算法要用的临时变量，例如下标、指针、队列、当前结点或基准值。" };
+    return { syntax: "这是变量或对象声明：告诉程序接下来要使用什么类型的数据。", role: "为后续计算准备名字和存储空间；没有这一步，后面就不能使用这些变量。" };
+  }
+  if (lower.startsWith("if ")) {
+    const cond = (s.match(/\((.*)\)/) || [,"条件"])[1];
+    return { syntax: "`if` 是条件判断；括号里的表达式为真，就执行后面的语句或花括号代码块。", role: `根据 ${cond} 判断算法下一步该不该进入这个分支，这是控制流程方向的关键。` };
+  }
+  if (lower.startsWith("else if")) return { syntax: "`else if` 表示前面的 if 不成立时，再检查一个新条件。", role: "让程序在多个可能情况中选择正确路径，例如小于走左、大于走右、相等就找到。" };
+  if (lower.startsWith("else")) return { syntax: "`else` 表示前面的 if / else if 都不成立时执行。", role: "处理剩下的情况，保证算法不会漏掉某一类输入。" };
+  if (lower.startsWith("for ")) return { syntax: "`for(初始化; 条件; 更新)` 是计数循环，常用来按下标扫描数组、矩阵或邻居表。", role: family === "图" ? "逐个检查顶点或边，判断是否相邻、是否访问过、是否需要更新。" : "按顺序遍历一段数据，每一轮处理一个位置或一组元素。" };
+  if (lower.startsWith("while ")) return { syntax: "`while` 是条件循环，只要括号里的条件为真就继续执行。", role: "表示算法要反复推进，直到查找范围为空、队列为空、冲突解决或左右指针相遇。" };
+  if (s.includes("return")) {
+    if (s === "return;" || s.includes("return NULL") || s.includes("return -1")) return { syntax: "`return` 结束当前函数；后面带的值会作为函数结果交回调用者。", role: "这里通常表示递归出口、查找失败、空结点或算法已经没有继续处理的对象。" };
+    return { syntax: "`return 表达式` 会结束函数，并把表达式的结果返回给上一层调用。", role: "把当前层已经算出的答案交回去，例如返回找到的结点、更新后的树根或最终结果。" };
+  }
+  if (s.includes("new ")) return { syntax: "`new` 在内存中创建一个新对象，并返回它的地址；指针变量负责保存这个地址。", role: "算法需要新增结点时会用它，例如建树或插入 BST/AVL 的新结点。" };
+  if (s.includes("->")) return { syntax: "`->` 是指针访问成员的写法，例如 `T->data` 表示访问 T 指向结点里的 data。", role: "通过指针读写结点内容或连接左右孩子，是链式树结构能连起来的关键。" };
+  if (s.includes(".push") || s.includes("push(")) return { syntax: "`push` 表示把元素放入栈或队列等容器中。", role: "把后面要处理的对象加入等待区，例如 BFS 把新发现的邻居入队。" };
+  if (s.includes(".pop") || s.includes("pop(")) return { syntax: "`pop` 表示从栈或队列中移除一个元素。", role: "当前元素已经被取出处理，容器会转向下一个等待处理的对象。" };
+  if (s.includes(".front")) return { syntax: "`front()` 读取队头元素，但不删除它。", role: "BFS 先看队头是谁，再把它出队并访问它的邻居。" };
+  if (s.includes("swap(")) return { syntax: "`swap(a,b)` 交换两个变量或数组元素的值。", role: "排序中用它把元素放到更合适的位置，例如冒泡、选择或堆排序。" };
+  if (s.includes("++") || s.includes("--")) return { syntax: "`++` / `--` 出现在复杂表达式里时，表示一边使用变量一边改变它的值。", role: "这里通常是在循环或数组位置推进时顺手更新下标，需要结合整行判断它先用值还是先变化。" };
+  if (s.includes("=")) {
+    if (s.includes("==") || s.includes("<=") || s.includes(">=") || s.includes("!=")) return { syntax: "这一行包含比较运算，`==` 判断相等，`!=` 判断不等，`<=` / `>=` 判断范围关系。", role: "通过比较决定是否找到目标、是否继续循环、是否需要更新答案。" };
+    if (s.includes("[") && s.includes("]")) return { syntax: "`数组[下标] = 值` 表示把某个位置改成新值；二维数组会写成 `a[i][j]`。", role: "把算法状态记录到数组或矩阵中，例如标记边、保存结点、更新距离或移动排序元素。" };
+    return { syntax: "`=` 是赋值，不是判断相等；它把右边的结果存进左边变量。", role: "更新算法当前状态，例如改变指针、距离、下标、临时变量或树的连接关系。" };
+  }
+  if (s.includes("cout")) return { syntax: "`cout` 是 C++ 输出语句，`<<` 把内容送到屏幕。", role: "把当前访问到的结点、路径或结果打印出来，方便观察算法执行顺序。" };
+  if (s.includes("break")) return { syntax: "`break` 会立刻跳出当前循环。", role: "当已经找到答案或无需继续扫描时，提前结束循环，减少无用操作。" };
+  if (s.includes("continue")) return { syntax: "`continue` 会跳过本轮剩余语句，直接进入下一轮循环。", role: "当前元素不需要处理时，用它快速转到下一个元素。" };
+  if (family === "排序") return { syntax: "这是排序过程中的普通语句，通常配合循环、比较、赋值或交换一起工作。", role: "它负责维护有序区、未排序区、基准值、堆结构或临时结果表。" };
+  if (family === "图" || family === "最短路径") return { syntax: "这是图算法中的普通语句，通常围绕顶点、边、距离或访问标记展开。", role: "它会改变图算法的状态，例如选择边、标记顶点、更新距离或推进队列。" };
+  return { syntax: "这是当前函数中的一条普通语句，需要结合上下文理解。", role: "它服务于当前算法流程，通常是在准备数据、推进状态或收尾结果。" };
+}
+
+function isLowInfoCodeLine(s) {
+  if (!s) return true;
+  if (/^[{};]+$/.test(s)) return true;
+  if (/^}\s*(else\b.*)?$/.test(s)) return true;
+  if (/^(void|int|bool|node\*|binode\*|csnode\*?|elem)\b.*\([^)]*\)\s*\{?$/i.test(s)) return true;
+  if (/^(if|else\s+if|else|for|while)\b/.test(s)) return true;
+  if (/^[A-Za-z_]\w*(\+\+|--);$/.test(s)) return true;
+  if (/^(\+\+|--)[A-Za-z_]\w*;$/.test(s)) return true;
+  if (/^[A-Za-z_]\w*(\[[^\]]+\])*(\s*->\s*[A-Za-z_]\w*)?\s*=\s*[^=].*;$/.test(s)) return true;
+  if (/^[A-Za-z_]\w*(\[[^\]]+\])*(\s*->\s*[A-Za-z_]\w*)?\s*[\+\-\*\/%]?=\s*.*;$/.test(s)) return true;
+  if (/^[A-Za-z_]\w*\*?\s+[A-Za-z_]\w*(\s*=\s*.*)?;$/.test(s)) return true;
+  return false;
 }
 
 function renderKnowledge() {
@@ -470,21 +655,21 @@ function getKnowledge(algo) {
       { title:"1. 递归到底在干什么", body:"递归不是“神秘地自己调用自己”，而是把一个大问题拆成一个更小但同类型的问题。例如 Fact(4) 不急着算结果，而是先说：只要我知道 Fact(3)，我就能用 4*Fact(3) 得到答案。这样不断向下拆，直到遇到最小问题 Fact(0)=1，再一层一层返回。" },
       { title:"2. 写递归代码的固定模板", body:["第一步写出口：什么情况下不用再递归，直接返回结果。","第二步写当前层要做什么：当前参数代表哪个问题。","第三步写递归调用：把问题规模变小，传给同一个函数。","第四步写回收结果：递归返回后，当前层如何利用子问题答案。"] },
       { title:"3. 调用栈怎么理解", body:"每调用一次函数，系统都会给这次调用单独开一份局部变量空间，压入调用栈。递归向下时是在不断入栈；遇到出口后开始出栈。出栈时不是重新执行所有逻辑，而是回到当初暂停的位置继续算后半句。" },
-      { title:"4. 老师常问", body:["为什么递归一定要有出口？没有出口就会无限入栈直到栈溢出。","为什么递归会回到上一层？因为函数调用结束后，控制权回到调用它的那一行。","递归和循环有什么关系？很多递归可以改写成循环加栈，但递归更适合天然分层的问题。"] }
+      { title:"4. 常见疑问", body:["为什么递归一定要有出口？没有出口就会无限入栈直到栈溢出。","为什么递归会回到上一层？因为函数调用结束后，控制权回到调用它的那一行。","递归和循环有什么关系？很多递归可以改写成循环加栈，但递归更适合天然分层的问题。"] }
     ],
     "实验四：二叉树与树": [
       { title:"1. 二叉链表是什么", body:"二叉树最常用的存储方式是二叉链表。每个结点包含三部分：data 保存数据，lchild 指向左孩子，rchild 指向右孩子。如果某个孩子不存在，对应指针就是 NULL。这样整棵树不是连续存在数组里，而是靠指针连接起来。" },
       { title:"2. 为什么二叉树天然适合递归", body:"每棵二叉树都可以看成：根结点 + 左子树 + 右子树。左子树和右子树本身又是二叉树，所以处理整棵树的方法可以原封不动用来处理子树。建树、遍历、求高度、求叶子数、找路径，本质都是先处理当前结点，再递归处理左右子树。" },
       { title:"3. 四层树要观察什么规律", body:["根结点 A 在第 1 层。","B、C 是第 2 层，它们分别是 A 的左右子树根。","D、E、F、G 是第 3 层，能清楚看到递归分叉。","H 到 O 是第 4 层叶子，最适合观察递归什么时候返回。","顺序存储中，根下标为 1，左孩子是 2*i，右孩子是 2*i+1。"] },
       { title:"4. 建树函数为什么 i 要用引用", body:"文件按先序排列：根、左子树、右子树。程序每读一行就创建一个结点，读完当前结点后要继续读下一行。如果 i 不是引用，那么递归函数内部改动的 i 不会影响外层，外层还会停在旧位置，右子树就会读错。引用的作用是让所有递归层共享同一个“当前读到第几行”的指针。" },
-      { title:"5. 答辩时怎么讲", body:["先说文件格式：每行是 当前结点 + 是否有左子树 + 是否有右子树。","再说创建顺序：先创建根，如果左标志为 1 就递归创建左子树，如果右标志为 1 就递归创建右子树。","最后强调 k=i：保存当前行，防止递归创建左子树时把 i 改掉，导致右标志判断错位。"] }
+      { title:"5. 学习时怎么抓重点", body:["先看文件格式：每行是 当前结点 + 是否有左子树 + 是否有右子树。","再看创建顺序：先创建根，如果左标志为 1 就递归创建左子树，如果右标志为 1 就递归创建右子树。","最后注意 k=i：保存当前行，防止递归创建左子树时把 i 改掉，导致右标志判断错位。"] }
     ],
     "图": [
       { title:"1. 图和树的区别", body:"树是一种特殊的图：连通、无环、n 个顶点正好有 n-1 条边。普通图更自由，顶点之间可以有环，也可以不连通。正因为图可能有环，遍历图时必须有 visited 数组，否则程序可能在环里反复转。" },
       { title:"2. 邻接矩阵", body:"邻接矩阵是一个二维数组 edge[i][j]。如果 i 和 j 有边，就记为 1 或边权；没有边就记为 0 或无穷。无向图的矩阵关于主对角线对称，因为 i-j 和 j-i 是同一条边。矩阵优点是判断两点是否相邻很快，缺点是顶点多但边少时浪费空间。" },
       { title:"3. 邻接表", body:"邻接表给每个顶点维护一个邻居表，只存真正相连的顶点。比如顶点 0 只和 1、2 相连，那么 adj[0] 里只放 1 和 2。它适合稀疏图，空间复杂度是 O(V+E)，遍历一个顶点的所有邻居也更自然。" },
       { title:"4. DFS 与 BFS", body:["DFS：深度优先，一条路先走到底，走不动再回退，底层依靠递归栈或手写栈。","BFS：广度优先，先访问起点的一圈邻居，再访问下一圈，底层依靠队列。","无权图最短路径一般用 BFS，因为它按层推进，第一次到达某点就是最短步数。"] },
-      { title:"5. 答辩时怎么讲矩阵数边", body:"无向图每条边会在矩阵中出现两次：edge[a][b] 和 edge[b][a]。如果把整个矩阵都数一遍，边数会翻倍。所以通常只数右上三角，也就是 j 从 i+1 开始。" }
+      { title:"5. 矩阵数边怎么理解", body:"无向图每条边会在矩阵中出现两次：edge[a][b] 和 edge[b][a]。如果把整个矩阵都数一遍，边数会翻倍。所以通常只数右上三角，也就是 j 从 i+1 开始。" }
     ],
     "最短路径": [
       { title:"松弛", body:"松弛就是问：从起点到 v 的距离，能不能通过 u 中转变得更短。如果更短，就更新 dist[v]。" },
@@ -500,9 +685,9 @@ function getKnowledge(algo) {
     ],
     "排序": [
       { title:"1. 排序算法的共同目标", body:"排序的本质是把无序序列变成按关键字递增或递减的序列。不同算法的差别在于每一趟“确定了什么”：冒泡每趟把最大值推到末尾，选择每趟选最小值放前面，插入每趟把一个新元素插入有序区，快速排序每趟让 pivot 归位。" },
-      { title:"2. 稳定性", body:"如果两个相等元素在排序前 A 在 B 前面，排序后 A 仍在 B 前面，这个排序就是稳定的。插入排序、冒泡排序、归并排序通常稳定；选择排序、快速排序、堆排序通常不稳定。答辩时老师很喜欢问稳定性，因为它能看出你是否理解交换过程。" },
+      { title:"2. 稳定性", body:"如果两个相等元素在排序前 A 在 B 前面，排序后 A 仍在 B 前面，这个排序就是稳定的。插入排序、冒泡排序、归并排序通常稳定；选择排序、快速排序、堆排序通常不稳定。理解稳定性时，要关注相等元素在移动或交换后相对顺序有没有改变。" },
       { title:"3. 时间复杂度怎么记", body:["O(n²)：直接插入、冒泡、选择，适合小规模或基本有序数据。","O(n log n)：快速、归并、堆，是比较排序里常见的高效算法。","O(n+k) 或 O(d(n+r))：计数、桶、基数排序，不完全靠比较，但要求数据范围或位数条件合适。"] },
-      { title:"4. 写排序代码的答辩套路", body:["先说明外层循环控制“趟数”。","再说明内层循环做比较、移动或交换。","然后指出哪些区间已经有序，哪些区间还未处理。","最后说明最好、最坏、平均复杂度，以及是否稳定。"] }
+      { title:"4. 读排序代码的思路", body:["先看外层循环控制“趟数”。","再看内层循环做比较、移动或交换。","然后指出哪些区间已经有序，哪些区间还未处理。","最后理解最好、最坏、平均复杂度，以及是否稳定。"] }
     ]
   };
   const cards = common[algo.group] || common["排序"];
@@ -527,6 +712,7 @@ function next() {
     renderAll();
   } else {
     stop();
+    updateStepButtons();
   }
 }
 
@@ -554,6 +740,18 @@ function stop() {
   if (timer) clearInterval(timer);
   timer = null;
   $("playBtn").textContent = "▶ 播放";
+}
+
+function updateStepButtons() {
+  const atEnd = stepIndex >= steps.length - 1;
+  const atStart = stepIndex <= 0;
+  const nextBtn = $("nextBtn");
+  const prevBtn = $("prevBtn");
+  nextBtn.classList.toggle("finalStep", atEnd);
+  nextBtn.setAttribute("aria-disabled", atEnd ? "true" : "false");
+  nextBtn.title = atEnd ? "已经是最后一步，没有下一步" : "前进一步";
+  nextBtn.textContent = atEnd ? "已到最后一步" : "下一步 →";
+  prevBtn.classList.toggle("mutedStep", atStart);
 }
 
 function initNav() {
@@ -628,7 +826,7 @@ function buildTreeSteps() {
   const done = [];
   return seq.map(([node,row,edge,text,lines]) => {
     done.push(node);
-    return { text, active: [node], done: done.slice(), edge, row, lines, state: { i: row, "当前结点": node }, defense: "答辩时强调：文件是先序，i 用引用推进，k 保存当前行以免右子树判断错位。" };
+    return { text, active: [node], done: done.slice(), edge, row, lines, state: { i: row, "当前结点": node }, defense: "学习重点：文件是先序，i 用引用推进，k 保存当前行以免右子树判断错位。" };
   });
 }
 
@@ -689,7 +887,7 @@ function buildArraySteps() {
   const arr = Array(16).fill("#");
   return mapping.map(([n, idx]) => {
     arr[idx] = n;
-    return { text: `访问结点 ${n}，按完全二叉树编号放入 s[${idx}]。`, active:[n], done: mapping.filter(m => arr[m[1]] !== "#").map(m => m[0]), arr: arr.slice(), state:{ "当前结点": n, "数组下标": idx, "编号规则":"左=2*i，右=2*i+1" }, lines:[3,4,5,6], defense:"老师问为什么从 1 开始：根为 1 时父子编号公式最简单。" };
+    return { text: `访问结点 ${n}，按完全二叉树编号放入 s[${idx}]。`, active:[n], done: mapping.filter(m => arr[m[1]] !== "#").map(m => m[0]), arr: arr.slice(), state:{ "当前结点": n, "数组下标": idx, "编号规则":"左=2*i，右=2*i+1" }, lines:[3,4,5,6], defense:"理解提醒：从 1 开始编号时，根为 1，父子编号公式最简单。" };
   });
 }
 
@@ -703,7 +901,7 @@ function buildRelationSteps() {
     { text:"A 不是 B，进入左子树，找到 B。", active:["B"], done:["A"], state:{findNode:"返回 B 指针"}, lines:[4,5] },
     { text:"查父结点时，发现 A 的左孩子就是 B，所以父结点是 A。", active:["A","B"], edge:["A","B"], state:{父结点:"A"}, lines:[5] },
     { text:"B 的兄弟是 A 的另一个孩子 C；B 的孩子是 D、E。", active:["B","C","D","E"], done:["A"], state:{右兄弟:"C", 左孩子:"D", 右孩子:"E"}, lines:[6] }
-  ].map(s => ({...s, defense:"答辩时说：二叉树没有 parent 指针，所以父结点要从根开始找谁的孩子等于 x。"}));
+  ].map(s => ({...s, defense:"学习重点：二叉树没有 parent 指针，所以父结点要从根开始找谁的孩子等于 x。"}));
 }
 
 function renderRelation(el, step) {
@@ -738,19 +936,38 @@ function buildChildSiblingSteps() {
     { text:"普通树 A 的孩子是 B、C、D。孩子兄弟表示中，A.firstChild 指向 B。", state:{firstChild:"A -> B"}, active:["A","B"] },
     { text:"B.nextSibling 指向 C，C.nextSibling 指向 D。兄弟们横向串成链。", state:{兄弟链:"B -> C -> D"}, active:["B","C","D"] },
     { text:"求 A 的度：从 firstChild 开始沿 nextSibling 数，B、C、D 共 3 个孩子。", state:{nodeDegree:"3"}, active:["A"] },
-    { text:"广义表输出：根 A 后面有孩子，所以写 A(B,C,D)。", state:{广义表:"A(B,C,D)"}, active:["A","B","C","D"], defense:"答辩时强调：firstChild 向下，nextSibling 向右，不是普通二叉树的左右孩子。" }
+    { text:"广义表输出：根 A 后面有孩子，所以写 A(B,C,D)。", state:{广义表:"A(B,C,D)"}, active:["A","B","C","D"], defense:"学习重点：firstChild 向下，nextSibling 向右，它不是普通二叉树的左右孩子。" }
   ];
 }
 
 function renderChildSibling(el, step) {
   const active = new Set(step.active || []);
-  el.innerHTML = `<div class="svgWrap"><svg viewBox="0 0 650 300" width="650">
-    <line class="edge ${active.has("A")&&active.has("B")?"active":""}" x1="120" y1="70" x2="120" y2="170"/>
-    <line class="edge ${active.has("B")&&active.has("C")?"active":""}" x1="150" y1="170" x2="300" y2="170"/>
-    <line class="edge ${active.has("C")&&active.has("D")?"active":""}" x1="330" y1="170" x2="480" y2="170"/>
-    ${[["A",120,70],["B",120,170],["C",300,170],["D",480,170]].map(([n,x,y]) => `<g class="node ${active.has(n)?"active":""}"><circle cx="${x}" cy="${y}" r="28"/><text x="${x}" y="${y}">${n}</text></g>`).join("")}
-    <text x="155" y="120">firstChild</text><text x="230" y="150">nextSibling</text>
-  </svg></div>`;
+  const edgeCls = (a, b) => active.has(a) && active.has(b) ? "active" : "";
+  const nodes = [["A",210,72],["B",210,232],["C",430,232],["D",650,232]];
+  el.innerHTML = `<div class="csDiagram">
+  <div class="svgWrap"><svg viewBox="0 0 860 420" width="860" aria-label="孩子兄弟表示示意图">
+      <defs>
+        <marker id="csArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#8a9ba3"></path>
+        </marker>
+        <marker id="csArrowActive" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#b7791f"></path>
+        </marker>
+      </defs>
+      <line class="edge ${edgeCls("A","B")}" marker-end="url(#${edgeCls("A","B") ? "csArrowActive" : "csArrow"})" x1="210" y1="108" x2="210" y2="192"/>
+      <line class="edge ${edgeCls("B","C")}" marker-end="url(#${edgeCls("B","C") ? "csArrowActive" : "csArrow"})" x1="248" y1="232" x2="392" y2="232"/>
+      <line class="edge ${edgeCls("C","D")}" marker-end="url(#${edgeCls("C","D") ? "csArrowActive" : "csArrow"})" x1="468" y1="232" x2="612" y2="232"/>
+      <rect x="252" y="132" width="158" height="36" rx="4" fill="#fff" opacity=".96"/>
+      <rect x="320" y="178" width="190" height="36" rx="4" fill="#fff" opacity=".96"/>
+      <rect x="540" y="178" width="190" height="36" rx="4" fill="#fff" opacity=".96"/>
+      <text x="331" y="154" class="csLabel">firstChild 向下</text>
+      <text x="415" y="200" class="csLabel">nextSibling 向右</text>
+      <text x="635" y="200" class="csLabel">nextSibling 向右</text>
+      ${nodes.map(([n,x,y]) => `<g class="node ${active.has(n)?"active":""}"><circle cx="${x}" cy="${y}" r="36"/><text x="${x}" y="${y}">${n}</text></g>`).join("")}
+      <text x="210" y="330" class="csHint">A 的孩子链：B → C → D</text>
+      <text x="210" y="362" class="csHint">所以树的度 = max(结点孩子数) = 3</text>
+    </svg></div>
+  </div>`;
 }
 
 function buildMatrixSteps() {
@@ -812,11 +1029,26 @@ function renderWeightedGraph(el, step) {
   const isChosen = (a,b) => chosen.some(e => (e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a));
   el.innerHTML = `<div class="svgWrap"><svg viewBox="0 0 600 360" width="620">
     ${g.edges.map(([a,b,w]) => {
-      const pa=g.pos[a], pb=g.pos[b], mx=(pa.x+pb.x)/2, my=(pa.y+pb.y)/2;
-      return `<line class="edge ${isChosen(a,b)?"active":""}" x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}"/><text x="${mx}" y="${my-5}" style="font-size:14px;fill:#b7791f">${w}</text>`;
+      const pa=g.pos[a], pb=g.pos[b];
+      return `<line class="edge ${isChosen(a,b)?"active":""}" x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}"/>${edgeWeightLabel(pa, pb, w, 18)}`;
     }).join("")}
     ${Object.entries(g.pos).map(([k,p]) => `<g class="node ${(step.active||[]).includes(Number(k))?"active":""}"><circle cx="${p.x}" cy="${p.y}" r="27"/><text x="${p.x}" y="${p.y}">${k}</text></g>`).join("")}
   </svg></div>`;
+}
+
+function edgeWeightLabel(pa, pb, text, offset = 16) {
+  const mx = (pa.x + pb.x) / 2;
+  const my = (pa.y + pb.y) / 2;
+  const dx = pb.x - pa.x;
+  const dy = pb.y - pa.y;
+  const len = Math.hypot(dx, dy) || 1;
+  let nx = -dy / len;
+  let ny = dx / len;
+  if (Math.abs(dy) < 8) ny = -1;
+  if (Math.abs(dx) < 8) nx = 1;
+  const x = Math.round(mx + nx * offset);
+  const y = Math.round(my + ny * offset);
+  return `<g class="edgeWeight"><rect class="edgeWeightBg" x="${x - 13}" y="${y - 11}" width="26" height="22" rx="4"/><text class="edgeWeightText" x="${x}" y="${y}">${text}</text></g>`;
 }
 
 function buildTopoSteps() {
@@ -1018,7 +1250,7 @@ function buildBstSteps() {
         bstInsert(tempRoot, t.key, []);
         steps.push({ text:`找到空位置，把 ${t.key} 挂到 ${t.parent} 的${t.side}。`, tree:cloneTree(tempRoot), active:[t.key, t.parent], state:{父结点:t.parent, 新结点:t.key, 方向:t.side}, lines:[10,14], defense:"插入 BST 时，新结点一定作为叶子挂入。" });
       } else if (t.type === "duplicate") {
-        steps.push({ text:`${t.key} 已存在，当前版本默认不插入重复值。`, tree:cloneTree(tempRoot), active:[t.at], state:{重复值:t.key}, defense:"答辩时说明重复关键字可以选择忽略、计数或放到固定一侧，本程序选择忽略。" });
+        steps.push({ text:`${t.key} 已存在，当前版本默认不插入重复值。`, tree:cloneTree(tempRoot), active:[t.at], state:{重复值:t.key}, defense:"学习提示：重复关键字可以选择忽略、计数或放到固定一侧，本程序选择忽略。" });
       }
     });
     return steps;
@@ -1066,12 +1298,13 @@ function renderTreeSvg(root, active = [], done = [], showHeight = false) {
   const { nodes, edges } = layoutBinaryTree(root);
   const activeSet = new Set(active.map(String)), doneSet = new Set(done.map(String));
   const maxY = Math.max(...nodes.map(n => n.y)) + 60;
+  const r = showHeight ? 30 : 26;
   return `<div class="svgWrap"><svg viewBox="0 0 800 ${maxY}" width="800">
     ${edges.map(e => `<line class="edge" x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}"/>`).join("")}
     ${nodes.map(n => `<g class="node ${activeSet.has(String(n.key)) ? "active" : doneSet.has(String(n.key)) ? "done" : ""}">
-      <circle cx="${n.x}" cy="${n.y}" r="26"></circle>
-      <text x="${n.x}" y="${n.y - (showHeight ? 5 : 0)}">${n.key}</text>
-      ${showHeight ? `<text x="${n.x}" y="${n.y + 18}" style="font-size:10px;fill:#64748b">h=${n.h}</text>` : ""}
+      <circle cx="${n.x}" cy="${n.y}" r="${r}"></circle>
+      <text x="${n.x}" y="${n.y - (showHeight ? 8 : 0)}">${n.key}</text>
+      ${showHeight ? `<text class="heightText" x="${n.x}" y="${n.y + 13}">h=${n.h}</text>` : ""}
     </g>`).join("")}
   </svg></div>`;
 }
@@ -1485,10 +1718,8 @@ function dijkstraGraphSvg(active = [], done = []) {
   const edges = [[0,1,2],[0,2,5],[1,3,4],[1,4,2],[2,3,1],[4,3,2]];
   return `<div class="svgWrap"><svg viewBox="0 0 600 335" width="620">
     ${edges.map(([a,b,w]) => {
-      const midX = (pos[a].x + pos[b].x) / 2;
-      const midY = (pos[a].y + pos[b].y) / 2;
       return `<line class="edge" x1="${pos[a].x}" y1="${pos[a].y}" x2="${pos[b].x}" y2="${pos[b].y}"/>
-        <text x="${midX}" y="${midY - 8}" style="font-size:14px;fill:#64748b;text-anchor:middle">${w}</text>`;
+        ${edgeWeightLabel(pos[a], pos[b], w, 17)}`;
     }).join("")}
     ${Object.entries(pos).map(([k,p]) => `<g class="node ${active.includes(Number(k)) ? "active" : done.includes(Number(k)) ? "done" : ""}">
       <circle cx="${p.x}" cy="${p.y}" r="27"></circle><text x="${p.x}" y="${p.y}">${k}</text>
