@@ -417,8 +417,8 @@ button:hover { border-color: var(--accent); color: var(--accent); transform: tra
   display: none;
   left: 330px;
   right: 446px;
-  top: 154px;
-  height: min(430px, 42vh);
+  top: 216px;
+  bottom: 136px;
   padding: 0;
   background: transparent;
   pointer-events: none;
@@ -732,8 +732,8 @@ svg {
   .codePanel {
     left: 12px;
     right: 12px;
-    top: 120px;
-    height: min(360px, 42vh);
+    top: 190px;
+    bottom: 118px;
   }
 }
 
@@ -745,6 +745,7 @@ svg {
   .codePanel {
     left: 250px;
     right: 386px;
-    top: 150px;
+    top: 212px;
+    bottom: 128px;
   }
 }
