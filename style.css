@@ -418,7 +418,7 @@ button:hover { border-color: var(--accent); color: var(--accent); transform: tra
   left: 330px;
   right: 446px;
   top: 216px;
-  bottom: 136px;
+  bottom: 300px;
   padding: 0;
   background: transparent;
   pointer-events: none;
@@ -733,7 +733,7 @@ svg {
     left: 12px;
     right: 12px;
     top: 190px;
-    bottom: 118px;
+    bottom: 230px;
   }
 }
 
@@ -746,6 +746,6 @@ svg {
     left: 250px;
     right: 386px;
     top: 212px;
-    bottom: 128px;
+    bottom: 260px;
   }
 }

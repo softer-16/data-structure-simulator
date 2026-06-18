@@ -831,14 +831,35 @@ function buildTreeSteps() {
 }
 
 function buildFactSteps() {
-  return [
-    { text:"调用 Fact(4)，4 不是出口，等待 4 * Fact(3)。", stack:["Fact(4)"], state:{n:4, 动作:"入栈"}, lines:[1] },
-    { text:"调用 Fact(3)，继续等待 3 * Fact(2)。", stack:["Fact(4)","Fact(3)"], state:{n:3, 动作:"入栈"}, lines:[3] },
-    { text:"调用 Fact(2)，继续等待 2 * Fact(1)。", stack:["Fact(4)","Fact(3)","Fact(2)"], state:{n:2}, lines:[3] },
-    { text:"调用 Fact(1)，继续等待 1 * Fact(0)。", stack:["Fact(4)","Fact(3)","Fact(2)","Fact(1)"], state:{n:1}, lines:[3] },
-    { text:"调用 Fact(0)，命中出口，返回 1。", stack:["Fact(4)","Fact(3)","Fact(2)","Fact(1)","Fact(0)"], state:{返回:1}, lines:[2] },
-    { text:"开始出栈：Fact(1)=1*1=1，Fact(2)=2，Fact(3)=6，Fact(4)=24。", stack:["Fact(4)=24"], state:{最终结果:24}, lines:[3], defense:"递归先入栈拆问题，再从出口开始回收结果。" }
-  ];
+  const steps = [];
+  const stack = [];
+  for (let n = 5; n >= 1; n--) {
+    stack.push(`Fact(${n}) 等 Fact(${n - 1})`);
+    steps.push({
+      text:`调用 Fact(${n})：还没到出口，先把当前层压入调用栈，等待 ${n} * Fact(${n - 1}) 的结果。`,
+      stack: stack.slice(),
+      state:{n, 动作:"入栈", 暂停原因:`必须先算 Fact(${n - 1})`},
+      lines:[1,3],
+      defense:"递归不是马上得到答案，而是把当前层挂起，继续去算更小的问题。"
+    });
+  }
+  stack.push("Fact(0) = 1");
+  steps.push({ text:"调用 Fact(0)：命中出口，直接返回 1。没有这个出口，递归会一直调用下去。", stack:stack.slice(), state:{n:0, 返回:1, 动作:"命中出口"}, lines:[2] });
+  let result = 1;
+  for (let n = 1; n <= 5; n++) {
+    result *= n;
+    const visible = [];
+    for (let k = 5; k > n; k--) visible.push(`Fact(${k}) 等 Fact(${k - 1})`);
+    visible.push(`Fact(${n}) = ${result}`);
+    steps.push({
+      text:`从 Fact(${n - 1}) 返回后，回到 Fact(${n})：计算 ${n} * Fact(${n - 1}) = ${result}，然后把结果交回上一层。`,
+      stack:visible,
+      state:{当前层:`Fact(${n})`, 子问题结果:`Fact(${n - 1})`, 返回值:result},
+      lines:[3],
+      defense:"看递归返回时，要盯住“上一层暂停在哪一行”，返回值会回到那一行继续参与计算。"
+    });
+  }
+  return steps;
 }
 
 function renderCallStack(el, step) {
@@ -846,18 +867,47 @@ function renderCallStack(el, step) {
 }
 
 function buildHanoiSteps() {
-  return [
-    { text:"目标：把 3 个盘从 A 移到 B，C 辅助。先把上面 2 个从 A 移到 C。", pegs:{A:[3,2,1],B:[],C:[]}, state:{任务:"Hanoi(3,A,B,C)"}, lines:[1] },
-    { text:"移动小盘：A -> B。", pegs:{A:[3,2],B:[1],C:[]}, move:"A->B" },
-    { text:"移动中盘：A -> C。", pegs:{A:[3],B:[1],C:[2]}, move:"A->C" },
-    { text:"小盘从 B -> C，完成把 2 个盘移到辅助柱 C。", pegs:{A:[3],B:[],C:[2,1]}, move:"B->C" },
-    { text:"移动最大盘：A -> B。", pegs:{A:[],B:[3],C:[2,1]}, move:"A->B" },
-    { text:"再把 C 上 2 个盘移到 B，完成。", pegs:{A:[],B:[3,2,1],C:[]}, move:"C->B", defense:"Hanoi(n)=先移 n-1 + 移最大盘 + 再移 n-1。" }
-  ];
+  const pegs = { A:[4,3,2,1], B:[], C:[] };
+  const moves = [];
+  function plan(n, from, to, aux) {
+    if (n === 1) {
+      moves.push({ disk:1, from, to, reason:`只剩 1 号盘，直接从 ${from} 移到 ${to}。` });
+      return;
+    }
+    moves.push({ plan:true, n, from, to, aux, reason:`要移动 ${n} 个盘：先把上面 ${n - 1} 个从 ${from} 移到 ${aux}，给最大盘让路。` });
+    plan(n - 1, from, aux, to);
+    moves.push({ disk:n, from, to, reason:`上面 ${n - 1} 个盘已经让开，移动当前最大盘 ${n}：${from} -> ${to}。` });
+    plan(n - 1, aux, to, from);
+  }
+  plan(4, "A", "B", "C");
+  const steps = [{ text:"目标：把 4 个盘从 A 移到 B，C 作为辅助柱。4 个盘会产生 2^4-1=15 次真正移动。", pegs:clonePegs(pegs), state:{任务:"Hanoi(4,A,B,C)", 移动次数:"15"}, lines:[1], move:"分解任务" }];
+  let moveNo = 0;
+  moves.forEach(m => {
+    if (m.plan) {
+      steps.push({ text:m.reason, pegs:clonePegs(pegs), state:{子问题:`Hanoi(${m.n}, ${m.from}, ${m.to}, ${m.aux})`, 策略:"先挪 n-1，再挪最大盘，再挪 n-1"}, lines:[1], move:"分解子问题" });
+      return;
+    }
+    moveNo++;
+    const disk = pegs[m.from].pop();
+    pegs[m.to].push(disk);
+    steps.push({
+      text:`第 ${moveNo} 次移动：${m.reason}`,
+      pegs:clonePegs(pegs),
+      move:`${m.from}->${m.to}`,
+      state:{移动序号:`${moveNo}/15`, 盘号:disk, 规则:"小盘必须在大盘上面"},
+      defense:"每一步只能移动最上面的一个盘，并且不能把大盘放到小盘上。"
+    });
+  });
+  steps[steps.length - 1].defense = "汉诺塔的核心递推：Hanoi(n)=Hanoi(n-1)+移动最大盘+Hanoi(n-1)，所以移动次数是 2^n-1。";
+  return steps;
+}
+
+function clonePegs(pegs) {
+  return { A:pegs.A.slice(), B:pegs.B.slice(), C:pegs.C.slice() };
 }
 
 function renderHanoi(el, step) {
-  const peg = (name, disks) => `<div><div class="label">${name}</div><div class="stackQueue" style="height:130px;align-items:flex-end;flex-direction:column-reverse">${disks.map(d => `<div class="token" style="width:${50+d*24}px;text-align:center">${d}</div>`).join("")}</div></div>`;
+  const peg = (name, disks) => `<div><div class="label">${name}</div><div class="stackQueue" style="height:165px;align-items:flex-end;flex-direction:column-reverse">${disks.map(d => `<div class="token" style="width:${50+d*24}px;text-align:center">${d}</div>`).join("")}</div></div>`;
   el.innerHTML = `<div class="row" style="gap:40px">${peg("A", step.pegs.A)}${peg("B", step.pegs.B)}${peg("C", step.pegs.C)}</div><div class="formula">本步移动：${step.move || "分解任务"}</div>`;
 }
 
@@ -876,9 +926,15 @@ function renderTraversal(el, step) {
 
 function buildTreeMetricSteps() {
   return [
-    { text:"求高度：空树高度 0，叶子高度 1。第四层叶子 H 的高度是 1，D 的高度=max(H,I)+1=2，B 的高度=3，A 的高度=4。", active:["H","D","B","A"], state:{函数:"Height", 合并:"max(left,right)+1", 整树高度:4}, lines:[1] },
-    { text:"求结点数：空树为 0，当前树结点数=左子树结点数+右子树结点数+1。", active:["A"], state:{函数:"Count", 合并:"left+right+1"}, lines:[2] },
-    { text:"求叶子数：左右孩子都为空时返回 1；四层满二叉树的叶子是 H 到 O，共 8 个。", active:["H","I","J","K","L","M","N","O"], state:{函数:"LeafCount", 叶子:"H,I,J,K,L,M,N,O", 叶子数:8}, lines:[3], defense:"高度用 max，结点数/叶子数用加法，别混。" }
+    { text:"求高度先一路递归到第四层：H、I 没有孩子，所以它们的左子树高度和右子树高度都是 0。", active:["H","I"], done:[], state:{函数:"Height", 当前:"H/I", 左右高度:"0 和 0", 返回:"1"}, lines:[1] },
+    { text:"回到 D：左孩子 H 返回 1，右孩子 I 返回 1，所以 D 的高度=max(1,1)+1=2。", active:["D","H","I"], done:["H","I"], state:{当前:"D", 合并:"max(1,1)+1", 返回:2}, lines:[1] },
+    { text:"同理，E 的左右孩子 J、K 都是叶子，所以 E 的高度也是 2。B 收到 D=2、E=2，返回 max(2,2)+1=3。", active:["B","D","E"], done:["H","I","J","K"], state:{当前:"B", 左子树高度:2, 右子树高度:2, 返回:3}, lines:[1] },
+    { text:"右子树 C 的计算完全对称：F、G 高度为 2，C 返回 3；最后 A 收到左右高度都是 3，整棵树高度为 4。", active:["A","B","C"], done:["B","C"], state:{当前:"A", 左右高度:"3 和 3", 整树高度:4}, lines:[1] },
+    { text:"求结点数时，每个结点都返回：左子树结点数 + 右子树结点数 + 自己 1 个。D 子树有 H、I 和 D，共 3 个。", active:["D","H","I"], done:["H","I"], state:{函数:"Count", 当前:"D", 合并:"1+1+1", 返回:3}, lines:[2] },
+    { text:"B 子树由 D 子树 3 个、E 子树 3 个、B 自己 1 个组成，所以 B 子树结点数是 7。", active:["B","D","E"], done:["D","E"], state:{当前:"B", 合并:"3+3+1", 返回:7}, lines:[2] },
+    { text:"A 收到左子树 7 个、右子树 7 个，再加 A 自己，整棵树结点数是 15。", active:["A","B","C"], done:["B","C"], state:{当前:"A", 合并:"7+7+1", 结点总数:15}, lines:[2] },
+    { text:"求叶子数时，只有左右孩子都为空的结点才返回 1。第四层 H 到 O 全是叶子，其它内部结点不直接计 1。", active:["H","I","J","K","L","M","N","O"], state:{函数:"LeafCount", 叶子:"H,I,J,K,L,M,N,O", 叶子数:8}, lines:[3] },
+    { text:"最后向上合并叶子数：D 有 2 个叶子，B 有 4 个叶子，A 左右各 4 个，所以整棵树叶子数是 8。", active:["A","B","C"], done:["H","I","J","K","L","M","N","O"], state:{合并:"4+4", 整树叶子数:8}, lines:[3], defense:"高度用 max 合并；结点数和叶子数用加法合并。不要把这三类返回值混在一起。" }
   ];
 }
 
