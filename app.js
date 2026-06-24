@@ -288,6 +288,58 @@ const algorithms = [
   { id: "bucket", page: 29, group: "排序", title: "桶排序", subtitle: "按范围分桶，桶内排序", complexity: "依分布而定", build: buildBucketSteps, render: renderBuckets, code: codes.hash }
 ];
 
+function getComplexityInfo(algo) {
+  const exact = {
+    fact: { time:"最好/平均/最坏：O(n)", space:"O(n) 调用栈", note:"Fact(n) 从 n 一直递归到 0，每少 1 就多一层调用；没有提前结束分支。" },
+    hanoi: { time:"最好/平均/最坏：O(2^n)", space:"O(n) 调用栈", note:"n 个盘必须执行 2^n-1 次移动，盘数每加 1，步骤几乎翻倍。" },
+    traversal: { time:"O(n)", space:"O(h)", note:"每个结点访问一次；h 是树高，平衡树约 log n，链状树最坏 n。" },
+    heightCount: { time:"O(n)", space:"O(h)", note:"高度、结点数、叶子数都要看完整棵树；递归栈深度取决于树高。" },
+    buildTree: { time:"O(n)", space:"O(h)+O(n)", note:"每条文件记录创建一个结点；结点本身占 O(n)，递归栈取决于树高 h。" },
+    treeArray: { time:"O(n)", space:"O(n)", note:"每个结点按编号写入顺序数组一次；数组需要保存所有结点位置。" },
+    relation: { time:"最好 O(1)，最坏 O(n)", space:"O(h)", note:"若目标刚好在当前结点附近会很快；若在深层或不存在，需要扫描整棵树。" },
+    lca: { time:"最好 O(1)，最坏 O(n)", space:"O(h)", note:"若根结点就是答案可立即返回；否则可能要分别搜索左右子树。" },
+    leafPath: { time:"O(n)", space:"O(h)", note:"每个结点最多入路径一次；path 和递归栈长度等于当前根到叶路径高度。" },
+    childSibling: { time:"O(n)", space:"O(h)", note:"统计树的度要看每个结点的孩子链；递归深度取决于孩子兄弟结构高度。" },
+    matrix: { time:"建矩阵 O(E)，数边/判定 O(V^2)", space:"O(V^2)", note:"邻接矩阵必须准备 V×V 个格子；无向图数边只看上三角，避免同一条边数两次。" },
+    adjList: { time:"建表 O(V+E)，遍历邻居 O(度数)", space:"O(V+E)", note:"只保存真实存在的边，稀疏图比邻接矩阵更省空间。" },
+    dfs: { time:"邻接表 O(V+E)，邻接矩阵 O(V^2)", space:"O(V)", note:"visited 数组 O(V)，递归栈最深可能 O(V)；矩阵每个顶点都要扫一整行。" },
+    bfs: { time:"邻接表 O(V+E)，邻接矩阵 O(V^2)", space:"O(V)", note:"队列和 visited 最多保存 O(V) 个顶点；矩阵实现同样需要逐行扫描。" },
+    prim: { time:"朴素邻接矩阵 O(V^2)", space:"O(V^2)", note:"每轮从未选点里找最近点，矩阵版本适合稠密图。" },
+    kruskal: { time:"O(E log E)", space:"O(V+E)", note:"主要开销是给边排序；并查集查询和合并接近常数。" },
+    topo: { time:"O(V+E)", space:"O(V)", note:"每个点入队出队一次，每条边只用来减少一次入度。" },
+    dijkstra: { time:"朴素 O(V^2)，堆优化 O((V+E)logV)", space:"O(V+E)", note:"本演示按朴素写法：每轮线性找最近未确定点；若用优先队列适合稀疏图。" },
+    floyd: { time:"O(V^3)", space:"O(V^2)", note:"三层循环枚举中转点 k、起点 i、终点 j；适合点数较少的任意两点最短路。" },
+    sequential: { time:"最好 O(1)，平均 O(n)，最坏 O(n)", space:"O(1)", note:"目标在第一个位置是最好；目标在最后或不存在是最坏。" },
+    binary: { time:"最好 O(1)，平均/最坏 O(log n)", space:"O(1)", note:"第一次 mid 命中是最好；否则每轮排除一半，但前提是顺序表已经有序。" },
+    block: { time:"约 O(√n)，最坏 O(n)", space:"O(块数)", note:"索引和块大小设计合理时接近 √n；块过大或索引失效时会退化。" },
+    bst: { time:"最好/平均 O(log n)，最坏 O(n)", space:"O(h)", note:"树较平衡时每次排除半边；若按有序序列插入，BST 退化成链表。" },
+    avl: { time:"最好/平均/最坏 O(log n)", space:"O(h)", note:"AVL 强制左右高度差不超过 1，所以查找、插入、删除的路径高度都保持对数级。" },
+    hash: { time:"平均 O(1)，最坏 O(n)", space:"O(n)", note:"哈希函数分布均匀、负载因子合适时最快；大量冲突集中到同一桶会退化。" },
+    insertion: { time:"最好 O(n)，平均/最坏 O(n^2)", space:"O(1)", note:"数组基本有序时几乎不用右移；完全逆序时每个新元素都要一路挪到前面。" },
+    shell: { time:"依增量而定，常见约 O(n^1.3) 到 O(n^2)", space:"O(1)", note:"gap 选择决定效率；gap 逐步缩小能减少最后一次直接插入排序的移动量。" },
+    bubble: { time:"最好 O(n)，平均/最坏 O(n^2)", space:"O(1)", note:"若一趟没有交换可提前结束是最好；逆序时交换和比较最多。" },
+    quick: { time:"最好/平均 O(n log n)，最坏 O(n^2)", space:"平均 O(log n)，最坏 O(n)", note:"pivot 每次接近中间最好；每次都选到最大或最小会极度不平衡。" },
+    selection: { time:"最好/平均/最坏 O(n^2)", space:"O(1)", note:"无论数组是否有序，每一趟都要扫描未排序区找最小值。" },
+    heap: { time:"最好/平均/最坏 O(n log n)", space:"O(1)", note:"建堆 O(n)，之后每次取最大并下沉调整，整体保持 n log n。" },
+    merge: { time:"最好/平均/最坏 O(n log n)", space:"O(n)", note:"每层合并都处理全部元素，共约 log n 层；需要临时数组保存合并结果。" },
+    counting: { time:"O(n+k)", space:"O(k)", note:"k 是数值范围。范围小很快；若最大最小差距巨大，空间会浪费。" },
+    radix: { time:"O(d(n+r))", space:"O(n+r)", note:"d 是位数，r 是基数。适合位数固定的整数或字符串关键字。" },
+    bucket: { time:"平均 O(n+k)，最坏 O(n^2)", space:"O(n+k)", note:"数据均匀落入桶时很快；若大量元素挤进同一个桶，桶内排序可能退化。" }
+  };
+  return exact[algo.id] || { time:`${algo.complexity}`, space:"视具体存储结构而定", note:"先看输入规模 n、顶点数 V、边数 E 或范围 k，再判断循环层数和额外数组。" };
+}
+
+function renderComplexity(algo) {
+  const c = getComplexityInfo(algo);
+  return `
+    <div class="complexityLabel">复杂度</div>
+    <div class="complexityRows">
+      <span>时间</span><b>${escapeHtml(c.time)}</b>
+      <span>空间</span><b>${escapeHtml(c.space)}</b>
+    </div>
+    <div class="complexityNote">${escapeHtml(c.note)}</div>
+  `;
+}
 let current = algorithms[0];
 let steps = [];
 let stepIndex = 0;
@@ -307,7 +359,7 @@ function renderAll() {
   $("category").textContent = current.group;
   $("title").textContent = current.title;
   $("subtitle").textContent = current.subtitle;
-  $("complexity").textContent = `复杂度：${current.complexity}`;
+  $("complexity").innerHTML = renderComplexity(current);
   $("stepCount").textContent = `${stepIndex + 1} / ${steps.length}`;
   updateStepButtons();
   document.querySelectorAll(".algoBtn").forEach(b => b.classList.toggle("active", b.dataset.id === current.id));
