@@ -749,3 +749,38 @@ svg {
     bottom: 260px;
   }
 }
+
+.cell.hole {
+  background: #fff7ed;
+  border-color: #f59e0b;
+  border-style: dashed;
+  color: #b45309;
+  font-size: 13px;
+}
+
+.sortMeta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.tempChip,
+.moveChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 10px;
+  border: 1px solid #d38a23;
+  background: #fff4da;
+  color: #744600;
+  font-weight: 800;
+}
+
+.pivotChip {
+  border-color: #2f6f73;
+  background: #eaf3f5;
+  color: #1f5559;
+}

@@ -1495,14 +1495,15 @@ function buildInsertionSteps(arr) {
   const a = arr.slice(), steps = [{text:"初始数组。A[0] 单独一个元素，天然有序。", arr:a.slice(), active:[], done:[0], lines:[1]}];
   for (let i=1;i<a.length;i++) {
     const temp=a[i]; let j=i-1;
-    steps.push({text:`取 A[${i}]=${temp} 作为 temp，准备插入左边有序区。`, arr:a.slice(), active:[i], done:range(0,i-1), state:{i,temp}, lines:[2,3]});
+    steps.push({text:`取 A[${i}]=${temp} 作为 temp，先把它从数组里“拿出来”，A[${i}] 暂时变成空位。`, arr:a.slice(), active:[i], done:range(0,i-1), hole:i, temp, state:{i,temp, 空位:i}, lines:[2,3]});
     while (j>=0 && a[j]>temp) {
+      const moved = a[j];
       a[j+1]=a[j];
-      steps.push({text:`A[${j}]=${a[j]} 大于 temp=${temp}，右移到 A[${j+1}]。`, arr:a.slice(), active:[j,j+1], done:range(0,i), state:{j,temp}, lines:[5,6]});
+      steps.push({text:`A[${j}]=${moved} 大于 temp=${temp}，所以把 ${moved} 复制右移到 A[${j+1}]；空位左移到 A[${j}]，temp 仍然单独暂存，并没有丢失。`, arr:a.slice(), active:[j,j+1], done:range(0,i), hole:j, temp, move:`A[${j}] -> A[${j+1}]`, state:{j,temp, 空位:j}, lines:[5,6]});
       j--;
     }
     a[j+1]=temp;
-    steps.push({text:`把 temp=${temp} 放入 A[${j+1}]，本轮插入完成。`, arr:a.slice(), active:[j+1], done:range(0,i), lines:[9], defense:"插入排序稳定，因为相等时不右移。" });
+    steps.push({text:`找到插入位置 A[${j+1}]，把暂存的 temp=${temp} 放回空位，本轮插入完成。`, arr:a.slice(), active:[j+1], done:range(0,i), state:{插入位置:j+1}, lines:[9], defense:"插入排序稳定，因为相等时不右移；右移阶段出现“复制”是为了给 temp 腾位置。" });
   }
   return steps;
 }
@@ -1528,15 +1529,15 @@ function buildBubbleSteps(arr) {
 function buildQuickSteps(arr) {
   const a=arr.slice(), steps=[];
   let low=0, high=a.length-1, i=low, j=high, pivot=a[low];
-  steps.push({text:`选择 A[${low}]=${pivot} 作为 pivot，左边留出空位。`, arr:a.slice(), active:[low], pivot, lines:[3,4]});
+  steps.push({text:`选择 A[${low}]=${pivot} 作为 pivot，先把 pivot 暂存，A[${low}] 是等待填数的空位。`, arr:a.slice(), active:[low], hole:low, pivot, lines:[3,4], state:{pivot, 空位:low}});
   while (i<j) {
-    while (i<j && a[j]>=pivot) { steps.push({text:`从右找小于 pivot 的数：A[${j}]=${a[j]} >= ${pivot}，j 左移。`, arr:a.slice(), active:[j], pivot, lines:[6]}); j--; }
-    if (i<j) { a[i]=a[j]; steps.push({text:`找到 A[${j}]=${a[j]} 小于 pivot，填到左边空位 A[${i}]。`, arr:a.slice(), active:[i,j], pivot, lines:[7]}); }
-    while (i<j && a[i]<=pivot) { steps.push({text:`从左找大于 pivot 的数：A[${i}]=${a[i]} <= ${pivot}，i 右移。`, arr:a.slice(), active:[i], pivot, lines:[8]}); i++; }
-    if (i<j) { a[j]=a[i]; steps.push({text:`找到 A[${i}]=${a[i]} 大于 pivot，填到右边空位 A[${j}]。`, arr:a.slice(), active:[i,j], pivot, lines:[9]}); }
+    while (i<j && a[j]>=pivot) { steps.push({text:`从右往左找小于 pivot 的数：A[${j}]=${a[j]} >= ${pivot}，不合适，j 左移。`, arr:a.slice(), active:[j], hole:i, pivot, lines:[6], state:{pivot, 空位:i}}); j--; }
+    if (i<j) { const moved=a[j]; a[i]=a[j]; steps.push({text:`找到 A[${j}]=${moved} 小于 pivot，把它填到左边空位 A[${i}]；原来的 A[${j}] 变成新的空位。`, arr:a.slice(), active:[i,j], hole:j, pivot, move:`A[${j}] -> A[${i}]`, lines:[7], state:{pivot, 空位:j}}); }
+    while (i<j && a[i]<=pivot) { steps.push({text:`从左往右找大于 pivot 的数：A[${i}]=${a[i]} <= ${pivot}，不合适，i 右移。`, arr:a.slice(), active:[i], hole:j, pivot, lines:[8], state:{pivot, 空位:j}}); i++; }
+    if (i<j) { const moved=a[i]; a[j]=a[i]; steps.push({text:`找到 A[${i}]=${moved} 大于 pivot，把它填到右边空位 A[${j}]；原来的 A[${i}] 变成新的空位。`, arr:a.slice(), active:[i,j], hole:i, pivot, move:`A[${i}] -> A[${j}]`, lines:[9], state:{pivot, 空位:i}}); }
   }
   a[i]=pivot;
-  steps.push({text:`i 和 j 相遇，把 pivot=${pivot} 放到 A[${i}]，一趟划分完成。`, arr:a.slice(), active:[i], done:[i], pivot, lines:[11], defense:"一趟划分只保证 pivot 归位，左右两边还要递归排序。" });
+  steps.push({text:`i 和 j 相遇，把暂存的 pivot=${pivot} 放回 A[${i}]，一趟划分完成。`, arr:a.slice(), active:[i], done:[i], pivot, lines:[11], defense:"一趟划分只保证 pivot 归位，左右两边还要继续递归排序；空位法中间不是交换，而是来回填空。" });
   return steps;
 }
 
@@ -1552,7 +1553,20 @@ function buildMergeSteps() {
 }
 
 function renderArraySort(el, step) {
-  el.innerHTML = `<div class="row">${step.arr.map((v,i) => `<div><div class="cell ${step.active?.includes(i)?"active":step.done?.includes(i)?"done":""}">${v}</div><div class="index">${i}</div></div>`).join("")}</div>${step.pivot ? `<div class="formula">pivot = ${step.pivot}</div>` : ""}`;
+  const holes = new Set(Array.isArray(step.hole) ? step.hole : step.hole === undefined ? [] : [step.hole]);
+  const active = new Set(step.active || []);
+  const done = new Set(step.done || []);
+  const cells = step.arr.map((v,i) => {
+    const isHole = holes.has(i);
+    const cls = ["cell", active.has(i) ? "active" : "", done.has(i) ? "done" : "", isHole ? "hole" : ""].filter(Boolean).join(" ");
+    return `<div><div class="${cls}">${isHole ? "空位" : v}</div><div class="index">${i}</div></div>`;
+  }).join("");
+  const chips = [];
+  if (step.temp !== undefined) chips.push(`<span class="tempChip">暂存 temp = ${step.temp}</span>`);
+  if (step.pivot !== undefined) chips.push(`<span class="tempChip pivotChip">暂存 pivot = ${step.pivot}</span>`);
+  if (step.gap !== undefined) chips.push(`<span class="tempChip">gap = ${step.gap}</span>`);
+  if (step.move) chips.push(`<span class="moveChip">${escapeHtml(step.move)}</span>`);
+  el.innerHTML = `<div class="row">${cells}</div>${chips.length ? `<div class="sortMeta">${chips.join("")}</div>` : ""}`;
 }
 
 function renderMerge(el, step) {
@@ -1564,21 +1578,22 @@ function buildShellSteps() {
   const a = parseNums(simState.arrayText);
   const steps = [{ text:"初始数组。希尔排序先用较大的 gap 粗略调整，再逐步缩小 gap。", arr:a.slice(), active:[], done:[], state:{gap:"尚未开始"}, lines:[1] }];
   for (let gap = Math.floor(a.length / 2); gap >= 1; gap = Math.floor(gap / 2)) {
-    steps.push({ text:`本轮 gap=${gap}：下标相差 ${gap} 的元素属于同一组，在组内做插入排序。`, arr:a.slice(), active:[], done:[], state:{gap}, lines:[2,3] });
+    steps.push({ text:`本轮 gap=${gap}：下标相差 ${gap} 的元素属于同一组，在组内做插入排序。`, arr:a.slice(), active:[], done:[], gap, state:{gap}, lines:[2,3] });
     for (let i = gap; i < a.length; i++) {
       const temp = a[i];
       let j = i;
-      steps.push({ text:`取 A[${i}]=${temp}，它要和 A[${i-gap}], A[${i-2*gap}] ... 比较。`, arr:a.slice(), active:[i], done:[], state:{gap, i, temp}, lines:[4,5] });
+      steps.push({ text:`取 A[${i}]=${temp} 作为 temp，先把它暂存起来，A[${i}] 是这个 gap 小组里的空位。`, arr:a.slice(), active:[i], done:[], hole:i, temp, gap, state:{gap, i, temp, 空位:i}, lines:[4,5] });
       while (j >= gap && a[j - gap] > temp) {
+        const moved = a[j - gap];
         a[j] = a[j - gap];
-        steps.push({ text:`A[${j-gap}]=${a[j-gap]} 大于 temp=${temp}，沿 gap 间隔右移到 A[${j}]。`, arr:a.slice(), active:[j-gap,j], done:[], state:{gap, temp}, lines:[6,7] });
+        steps.push({ text:`A[${j-gap}]=${moved} 大于 temp=${temp}，沿 gap=${gap} 的间隔右移到 A[${j}]；空位退到 A[${j-gap}]，temp 仍在暂存区。`, arr:a.slice(), active:[j-gap,j], done:[], hole:j-gap, temp, gap, move:`A[${j-gap}] -> A[${j}]`, state:{gap, temp, 空位:j-gap}, lines:[6,7] });
         j -= gap;
       }
       a[j] = temp;
-      steps.push({ text:`把 temp=${temp} 放到 A[${j}]。gap=${gap} 的这一小组局部有序。`, arr:a.slice(), active:[j], done:[], state:{gap, 放入位置:j}, lines:[9] });
+      steps.push({ text:`把暂存的 temp=${temp} 放到 A[${j}]。这一条 gap=${gap} 的小组完成局部插入排序。`, arr:a.slice(), active:[j], done:[], gap, state:{gap, 放入位置:j}, lines:[9] });
     }
   }
-  steps.push({ text:"gap 缩小到 1 并完成后，整个数组有序。", arr:a.slice(), active:[], done:range(0,a.length-1), state:{完成:"有序"}, defense:"希尔排序本质是“分组插入排序”。gap 不是 1 时，元素可以一次跨很远，减少后面直接插入排序的移动次数。" });
+  steps.push({ text:"gap 缩小到 1 并完成后，整个数组有序。", arr:a.slice(), active:[], done:range(0,a.length-1), state:{完成:"有序"}, defense:"希尔排序本质是“分组插入排序”。看到右移时不要理解成交换：程序先暂存 temp，再把较大的元素按 gap 复制右移，最后把 temp 放回空位。" });
   return steps;
 }
 
@@ -1808,3 +1823,4 @@ function init() {
 }
 
 init();
+
