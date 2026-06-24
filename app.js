@@ -21,6 +21,22 @@ const tree = {
   root: "A"
 };
 
+const traversalTree = {
+  nodes: {
+    A: { x: 400, y: 45, l: "B", r: "C" },
+    B: { x: 230, y: 135, l: "D" },
+    C: { x: 570, y: 135, l: "E", r: "F" },
+    D: { x: 145, y: 225, r: "H" },
+    E: { x: 500, y: 225, l: "I", r: "J" },
+    F: { x: 685, y: 225, r: "K" },
+    H: { x: 220, y: 315 },
+    I: { x: 430, y: 315 },
+    J: { x: 560, y: 315 },
+    K: { x: 730, y: 315 }
+  },
+  root: "A"
+};
+
 const graph = {
   n: 15,
   edges: [[0,1],[0,2],[1,3],[1,4],[2,5],[2,6],[3,7],[3,8],[4,9],[4,10],[5,11],[5,12],[6,13],[6,14]],
@@ -265,11 +281,33 @@ Node* insertAVL(Node* T, int x) {
 }`;
 
 const algorithms = [
-  { id: "fact", page: 3, group: "递归", title: "阶乘递归 Fact", subtitle: "调用栈入栈/出栈", complexity: "O(n)", build: buildFactSteps, render: renderCallStack, code: codes.buildTree },
+  { id: "complexityLoop", page: "总1", group: "基础与复杂度", title: "循环复杂度判断", subtitle: "单循环、嵌套循环、折半循环", complexity: "看增长方式", build: buildComplexityLoopSteps, render: renderComplexityLoop, code: codes.binary },
+  { id: "linearInsertDelete", page: "总2", group: "线性表", title: "顺序表插入删除移动", subtitle: "删除左移，插入右移", complexity: "O(n)", build: buildLinearInsertDeleteSteps, render: renderArraySort, code: codes.insertion },
+  { id: "linkedDedup", page: "总2", group: "线性表", title: "有序链表删除重复", subtitle: "pre/p/q 指针不断接链", complexity: "O(n)", build: buildLinkedDedupSteps, render: renderLinkedList, code: codes.bst },
+  { id: "orderedIntersection", page: "总2", group: "线性表", title: "有序表交集 A=A∩B", subtitle: "双指针同步向前", complexity: "O(m+n)", build: buildOrderedIntersectionSteps, render: renderDualList, code: codes.merge },
+  { id: "linkedSplit", page: "总2", group: "线性表", title: "链表按条件拆分", subtitle: "尾插到两条结果链", complexity: "O(n)", build: buildLinkedSplitSteps, render: renderSplitList, code: codes.bst },
+  { id: "linkedInsertionSort", page: "总2", group: "线性表", title: "链表递增排序", subtitle: "摘结点插入有序链", complexity: "O(n²)", build: buildLinkedInsertionSortSteps, render: renderLinkedSort, code: codes.insertion },
+  { id: "doubleListDelete", page: "总2", group: "线性表", title: "双链表删除指针", subtitle: "前后两个方向都要接回", complexity: "O(1)", build: buildDoubleListDeleteSteps, render: renderDoubleListDelete, code: codes.bst },
+  { id: "linkedQueueEnqueue", page: "总3", group: "栈队串数组", title: "链队入队", subtitle: "rear->next=s，再 rear=s", complexity: "O(1)", build: buildLinkedQueueEnqueueSteps, render: renderLinkedQueue, code: codes.bfs },  { id: "stackSequence", page: "总3", group: "栈队串数组", title: "出栈序列合法性", subtitle: "目标不在栈顶就继续压栈", complexity: "O(n)", build: buildStackSequenceSteps, render: renderStackSequence, code: codes.bfs },
+  { id: "circularQueue", page: "总3", group: "栈队串数组", title: "循环队列判空判满", subtitle: "front/rear 取模绕回", complexity: "O(1)", build: buildCircularQueueSteps, render: renderCircularQueue, code: codes.bfs },
+  { id: "stringSubstrings", page: "总3", group: "栈队串数组", title: "串的子串数量", subtitle: "长度为 n 的非空子串数", complexity: "公式 O(1)", build: buildStringSubstringsSteps, render: renderStringSubstrings, code: codes.binary },
+  { id: "arrayAddress", page: "总3", group: "栈队串数组", title: "二维数组地址计算", subtitle: "行优先 / 列优先公式", complexity: "O(1)", build: buildArrayAddressSteps, render: renderArrayAddress, code: codes.matrix },
+  { id: "sparseMatrix", page: "总3", group: "栈队串数组", title: "稀疏矩阵三元组", subtitle: "只记录非零元素", complexity: "O(t)", build: buildSparseMatrixSteps, render: renderSparseMatrix, code: codes.matrix },
+  { id: "generalizedList", page: "总3", group: "栈队串数组", title: "广义表 head/tail", subtitle: "逐层取表头和表尾", complexity: "O(嵌套深度)", build: buildGeneralizedListSteps, render: renderGeneralizedList, code: codes.childSibling },
+  { id: "arrayPartition", page: "总8", group: "栈队串数组", title: "数组正负分区", subtitle: "左右指针原地交换", complexity: "O(n)", build: buildArrayPartitionSteps, render: renderArraySort, code: codes.quick },  { id: "fact", page: 3, group: "递归", title: "阶乘递归 Fact", subtitle: "调用栈入栈/出栈", complexity: "O(n)", build: buildFactSteps, render: renderCallStack, code: codes.buildTree },
   { id: "hanoi", page: 4, group: "递归", title: "汉诺塔 Hanoi", subtitle: "先移 n-1，再移最大盘，再移 n-1", complexity: "O(2^n)", build: buildHanoiSteps, render: renderHanoi, code: codes.buildTree },
-  { id: "traversal", page: 8, group: "树与二叉树", title: "二叉树三序遍历", subtitle: "根的位置决定先/中/后序", complexity: "O(n)", build: buildTraversalSteps, render: renderTraversal, code: codes.treeArray },
+  { id: "preorderTraversal", page: 8, group: "树与二叉树", title: "前序遍历", subtitle: "根 → 左子树 → 右子树", complexity: "O(n)", build: buildPreorderSteps, render: renderIrregularTraversal, code: codes.treeArray },
+  { id: "inorderTraversal", page: 8, group: "树与二叉树", title: "中序遍历", subtitle: "左子树 → 根 → 右子树", complexity: "O(n)", build: buildInorderSteps, render: renderIrregularTraversal, code: codes.treeArray },
+  { id: "postorderTraversal", page: 8, group: "树与二叉树", title: "后序遍历", subtitle: "左子树 → 右子树 → 根", complexity: "O(n)", build: buildPostorderSteps, render: renderIrregularTraversal, code: codes.treeArray },
   { id: "heightCount", page: 9, group: "树与二叉树", title: "高度/结点数/叶子数", subtitle: "同一棵树，不同合并方式", complexity: "O(n)", build: buildTreeMetricSteps, render: renderTraversal, code: codes.leafPath },
-  { id: "buildTree", page: 10, group: "实验四：二叉树与树", title: "二叉树递归建树", subtitle: "从 BinaryTree 文件记录生成二叉链表", complexity: "O(n)", build: buildTreeSteps, render: renderTreeBuild, code: codes.buildTree },
+  { id: "restoreTree", page: "总4", group: "树与二叉树", title: "遍历序列还原二叉树", subtitle: "先序定根，中序切左右", complexity: "O(n)", build: buildRestoreTreeSteps, render: renderRestoreTree, code: codes.treeArray },
+  { id: "threadedTree", page: "总4", group: "树与二叉树", title: "中序线索二叉树", subtitle: "用空指针保存前驱后继", complexity: "O(n)", build: buildThreadedTreeSteps, render: renderThreadedTree, code: codes.treeArray },
+  { id: "forestTransform", page: "总4", group: "树与二叉树", title: "树森林转二叉树", subtitle: "左孩子右兄弟", complexity: "O(n)", build: buildForestTransformSteps, render: renderForestTransform, code: codes.childSibling },
+  { id: "huffman", page: "总4", group: "树与二叉树", title: "Huffman 树与 WPL", subtitle: "每次合并最小两个权值", complexity: "O(n log n)", build: buildHuffmanSteps, render: renderHuffman, code: codes.treeArray },
+  { id: "nonRecursivePreorder", page: "总4", group: "树与二叉树", title: "非递归先序遍历", subtitle: "栈模拟根左右", complexity: "O(n)", build: buildNonRecursivePreorderSteps, render: renderTreeStack, code: codes.dfs },
+  { id: "deleteSubtree", page: "总4", group: "树与二叉树", title: "删除值为 x 的子树", subtitle: "先找到，再后序释放", complexity: "O(n)", build: buildDeleteSubtreeSteps, render: renderTreeMutation, code: codes.leafPath },
+  { id: "swapChildren", page: "总4", group: "树与二叉树", title: "交换二叉树左右孩子", subtitle: "递归交换每个结点", complexity: "O(n)", build: buildSwapChildrenSteps, render: renderTreeMutation, code: codes.leafPath },
+  { id: "levelOrderLeaves", page: "总4", group: "树与二叉树", title: "层序输出叶子", subtitle: "队列遍历，遇叶输出", complexity: "O(n)", build: buildLevelOrderLeavesSteps, render: renderLevelOrderLeaves, code: codes.bfs },  { id: "buildTree", page: 10, group: "实验四：二叉树与树", title: "二叉树递归建树", subtitle: "从 BinaryTree 文件记录生成二叉链表", complexity: "O(n)", build: buildTreeSteps, render: renderTreeBuild, code: codes.buildTree },
   { id: "treeArray", page: 11, group: "实验四：二叉树与树", title: "二叉链表转顺序存储", subtitle: "按完全二叉树编号放入数组", complexity: "O(n)", build: buildArraySteps, render: renderArrayTree, code: codes.treeArray },
   { id: "relation", page: 12, group: "实验四：二叉树与树", title: "父/兄弟/孩子查询", subtitle: "查找结点 B 的亲属关系", complexity: "O(n)", build: buildRelationSteps, render: renderRelation, code: codes.treeArray },
   { id: "lca", page: 13, group: "实验四：二叉树与树", title: "最近共同祖先 LCA", subtitle: "求 D 与 E 的最近共同祖先", complexity: "O(n)", build: buildLcaSteps, render: renderLca, code: codes.lca },
@@ -282,10 +320,17 @@ const algorithms = [
   { id: "prim", page: 21, group: "图", title: "Prim 最小生成树", subtitle: "从点集合向外扩张", complexity: "O(V²)", build: buildPrimSteps, render: renderWeightedGraph, code: codes.dijkstra },
   { id: "kruskal", page: 21, group: "图", title: "Kruskal 最小生成树", subtitle: "边从小到大，不成环就选", complexity: "O(E log E)", build: buildKruskalSteps, render: renderWeightedGraph, code: codes.dijkstra },
   { id: "topo", page: 22, group: "图", title: "拓扑排序", subtitle: "不断删除入度为 0 的点", complexity: "O(V+E)", build: buildTopoSteps, render: renderTopo, code: codes.dijkstra },
-  { id: "dijkstra", page: 23, group: "最短路径", title: "Dijkstra 单源最短路径", subtitle: "每次确定当前最近的点，再松弛邻居", complexity: "朴素 O(V²)", build: buildDijkstraSteps, render: renderDijkstra, code: codes.dijkstra },
+  { id: "connectedComponents", page: "总5", group: "图", title: "输出连通分量", subtitle: "多次 DFS 扫完整图", complexity: "O(V+E)", build: buildConnectedComponentsSteps, render: renderComponentGraph, code: codes.dfs },
+  { id: "matrixToList", page: "总5", group: "图", title: "邻接矩阵转邻接表", subtitle: "扫描矩阵行，发现 1 就加邻居", complexity: "O(V²)", build: buildMatrixToListSteps, render: renderMatrixToList, code: codes.matrix },
+  { id: "deleteVertexConnectivity", page: "总5", group: "图", title: "删除顶点后判断连通", subtitle: "跳过该点再 DFS/BFS", complexity: "O(V+E)", build: buildDeleteVertexConnectivitySteps, render: renderDeleteVertexGraph, code: codes.dfs },
+  { id: "aoeCritical", page: "总5", group: "图", title: "AOE 网关键路径", subtitle: "ve/vl 相等的活动是关键活动", complexity: "O(V+E)", build: buildAoeSteps, render: renderAoe, code: codes.dijkstra },  { id: "dijkstra", page: 23, group: "最短路径", title: "Dijkstra 单源最短路径", subtitle: "每次确定当前最近的点，再松弛邻居", complexity: "朴素 O(V²)", build: buildDijkstraSteps, render: renderDijkstra, code: codes.dijkstra },
   { id: "floyd", page: 24, group: "最短路径", title: "Floyd 任意两点最短路", subtitle: "枚举中转点 k", complexity: "O(V³)", build: buildFloydSteps, render: renderFloyd, code: codes.dijkstra },
   { id: "sequential", page: 25, group: "查找", title: "顺序查找", subtitle: "从头到尾一个个比", complexity: "O(n)", build: buildSequentialSteps, render: renderBinary, code: codes.binary },
-  { id: "binary", page: 25, group: "查找", title: "二分查找", subtitle: "每轮排除一半候选区间", complexity: "O(log n)", build: buildBinarySteps, render: renderBinary, code: codes.binary },
+  { id: "sequentialAsl", page: "总6", group: "查找", title: "顺序查找 ASL", subtitle: "比较次数求平均", complexity: "O(n)", build: buildSequentialAslSteps, render: renderSequentialAsl, code: codes.binary },
+  { id: "binaryDecisionTree", page: "总6", group: "查找", title: "二分查找判定树", subtitle: "比较次数等于所在层数", complexity: "O(log n)", build: buildBinaryDecisionTreeSteps, render: renderDecisionTree, code: codes.binary },
+  { id: "bstDelete", page: "总6", group: "查找", title: "BST 删除结点", subtitle: "叶子、单孩子、双孩子三类", complexity: "O(h)", build: buildBstDeleteSteps, render: renderBst, code: codes.bst },
+  { id: "bstAsl", page: "总6", group: "查找", title: "BST 平均查找长度 ASL", subtitle: "深度加权求平均", complexity: "O(n)", build: buildBstAslSteps, render: renderBstAsl, code: codes.bst },
+  { id: "hashAsl", page: "总6", group: "查找", title: "散列表成功/失败 ASL", subtitle: "逐个统计探测次数", complexity: "平均 O(1)", build: buildHashAslSteps, render: renderHashAsl, code: codes.hash },  { id: "binary", page: 25, group: "查找", title: "二分查找", subtitle: "每轮排除一半候选区间", complexity: "O(log n)", build: buildBinarySteps, render: renderBinary, code: codes.binary },
   { id: "block", page: 26, group: "查找", title: "分块查找", subtitle: "先查索引，再查块内", complexity: "介于 O(n) 与 O(log n)", build: buildBlockSteps, render: renderBlock, code: codes.binary },
   { id: "bst", page: 26, group: "查找", title: "BST 二叉排序树探索", subtitle: "自己输入数，观察插入和查找路径", complexity: "平均 O(log n)，最坏 O(n)", build: buildBstSteps, render: renderBst, code: codes.bst, params: "bst" },
   { id: "avl", page: 27, group: "查找", title: "AVL 平衡二叉树探索", subtitle: "插入后自动检查平衡并旋转", complexity: "O(log n)", build: buildAvlSteps, render: renderAvl, code: codes.avl, params: "avl" },
@@ -302,11 +347,47 @@ const algorithms = [
   { id: "bucket", page: 29, group: "排序", title: "桶排序", subtitle: "按范围分桶，桶内排序", complexity: "依分布而定", build: buildBucketSteps, render: renderBuckets, code: codes.hash }
 ];
 
+const extraComplexityInfo = {
+  complexityLoop:{time:"按代码形态：O(1)/O(log n)/O(n)/O(n^2)",space:"通常 O(1)",note:"先看循环变量增长方式，再保留最高阶。"},
+  linearInsertDelete:{time:"最好 O(1)，平均/最坏 O(n)",space:"O(1)",note:"表尾操作最好；表头或中间操作要移动元素。"},
+  linkedDedup:{time:"O(n)",space:"O(1)",note:"有序链表重复值相邻，一趟扫描即可。"},
+  orderedIntersection:{time:"O(m+n)",space:"O(1) 或 O(min(m,n))",note:"双指针只向前移动；新建结果表时空间为交集大小。"},
+  linkedSplit:{time:"O(n)",space:"O(1)",note:"若重连原结点，每个结点只访问一次。"},
+  linkedInsertionSort:{time:"最好 O(n)，平均/最坏 O(n^2)",space:"O(1)",note:"基本有序时插入位置容易找到；一般要在有序链中扫描。"},
+  doubleListDelete:{time:"已知结点 O(1)，查找结点 O(n)",space:"O(1)",note:"删除本身只改前后两个方向的指针。"},
+  linkedQueueEnqueue:{time:"入队/出队 O(1)",space:"O(n)",note:"链式队列不固定容量，但每个元素有指针域。"},
+  stackSequence:{time:"O(n)",space:"O(n)",note:"每个元素最多压栈一次、弹栈一次。"},
+  circularQueue:{time:"入队/出队 O(1)",space:"O(m)",note:"m 是数组容量；牺牲一格时最多存 m-1 个元素。"},
+  stringSubstrings:{time:"公式 O(1)，枚举 O(n^2)",space:"公式 O(1)，保存所有子串 O(n^2)",note:"问数量用公式，问列出所有子串才枚举。"},
+  arrayAddress:{time:"O(1)",space:"O(1)",note:"地址计算只套公式，与矩阵实际大小无关。"},
+  sparseMatrix:{time:"扫描 O(mn)，处理三元组 O(t)",space:"O(t)",note:"t 是非零元素个数。"},
+  generalizedList:{time:"与嵌套深度和操作次数有关",space:"O(1) 到 O(深度)",note:"每次 head/tail 只处理当前一层。"},
+  arrayPartition:{time:"O(n)",space:"O(1)",note:"左右指针各自单向移动，原地交换。"},
+  restoreTree:{time:"O(n) 到 O(n^2)",space:"O(n)",note:"用哈希表记录中序位置可 O(n)，反复线性查根最坏 O(n^2)。"},
+  threadedTree:{time:"线索化 O(n)",space:"O(1) 额外线索域",note:"利用空指针域，还需要 ltag/rtag 标志。"},
+  forestTransform:{time:"O(n)",space:"O(1) 或 O(n)",note:"原地改指针是 O(1) 额外空间，新建结构是 O(n)。"},
+  huffman:{time:"朴素 O(n^2)，堆优化 O(n log n)",space:"O(n)",note:"每次选当前最小两个权值合并。"},
+  nonRecursivePreorder:{time:"O(n)",space:"O(h) 到 O(n)",note:"每个结点入栈出栈一次，h 为树高。"},
+  deleteSubtree:{time:"O(n)",space:"O(h)",note:"最坏要找完整棵树，释放目标子树也要访问其全部结点。"},
+  swapChildren:{time:"O(n)",space:"O(h)",note:"每个结点交换一次左右孩子。"},
+  levelOrderLeaves:{time:"O(n)",space:"O(w)",note:"w 是树的最大宽度，队列最多保存一层。"},
+  connectedComponents:{time:"邻接表 O(V+E)，邻接矩阵 O(V^2)",space:"O(V)",note:"每个未访问顶点都可能启动一次 DFS/BFS。"},
+  matrixToList:{time:"O(V^2)",space:"O(V+E)",note:"必须扫描整个矩阵，结果只保存真实边。"},
+  deleteVertexConnectivity:{time:"邻接表 O(V+E)，邻接矩阵 O(V^2)",space:"O(V)",note:"遍历时跳过被删除顶点及关联边。"},
+  aoeCritical:{time:"O(V+E)",space:"O(V+E)",note:"基于拓扑序正向求 ve、逆向求 vl。"},
+  sequentialAsl:{time:"最好 O(1)，平均/最坏 O(n)",space:"O(1)",note:"等概率成功 ASL=(n+1)/2。"},
+  binaryDecisionTree:{time:"O(log n)",space:"画树 O(n)，实际查找 O(1)",note:"判定树用于分析比较次数。"},
+  bstDelete:{time:"平均 O(log n)，最坏 O(n)",space:"递归 O(h)，迭代 O(1)",note:"h 是树高；退化 BST 删除也会退化。"},
+  bstAsl:{time:"计算 ASL O(n)，单次查找 O(h)",space:"O(h)",note:"成功查找次数等于目标所在层数。"},
+  hashAsl:{time:"平均 O(1)，最坏 O(n)",space:"O(m+n)",note:"冲突越多，探测路径越长，ASL 越大。"}
+};
 function getComplexityInfo(algo) {
   const exact = {
     fact: { time:"最好/平均/最坏：O(n)", space:"O(n) 调用栈", note:"Fact(n) 从 n 一直递归到 0，每少 1 就多一层调用；没有提前结束分支。" },
     hanoi: { time:"最好/平均/最坏：O(2^n)", space:"O(n) 调用栈", note:"n 个盘必须执行 2^n-1 次移动，盘数每加 1，步骤几乎翻倍。" },
-    traversal: { time:"O(n)", space:"O(h)", note:"每个结点访问一次；h 是树高，平衡树约 log n，链状树最坏 n。" },
+    preorderTraversal: { time:"O(n)", space:"O(h)", note:"前序每个结点访问一次；h 是递归栈深度，不平衡树可能接近 n。" },
+    inorderTraversal: { time:"O(n)", space:"O(h)", note:"中序每个结点访问一次；若树退化成链，递归栈最坏 O(n)。" },
+    postorderTraversal: { time:"O(n)", space:"O(h)", note:"后序也必须访问所有结点；常用于先处理孩子再处理根。" },
     heightCount: { time:"O(n)", space:"O(h)", note:"高度、结点数、叶子数都要看完整棵树；递归栈深度取决于树高。" },
     buildTree: { time:"O(n)", space:"O(h)+O(n)", note:"每条文件记录创建一个结点；结点本身占 O(n)，递归栈取决于树高 h。" },
     treeArray: { time:"O(n)", space:"O(n)", note:"每个结点按编号写入顺序数组一次；数组需要保存所有结点位置。" },
@@ -387,7 +468,7 @@ function renderAll() {
   $("visual").innerHTML = "";
   const visualPanel = document.querySelector(".visualPanel");
   if (visualPanel) {
-    const largeVisuals = new Set(["fact", "hanoi", "sequential", "binary", "block", "merge", "counting", "radix", "bucket", "hash", "floyd", "topo"]);
+    const largeVisuals = new Set(["complexityLoop", "linearInsertDelete", "linkedDedup", "orderedIntersection", "linkedSplit", "linkedInsertionSort", "doubleListDelete", "linkedQueueEnqueue", "stackSequence", "circularQueue", "stringSubstrings", "arrayAddress", "sparseMatrix", "generalizedList", "arrayPartition", "fact", "hanoi", "sequential", "sequentialAsl", "binary", "binaryDecisionTree", "block", "merge", "counting", "radix", "bucket", "hash", "hashAsl", "floyd", "topo", "restoreTree", "threadedTree", "forestTransform", "huffman", "nonRecursivePreorder", "deleteSubtree", "swapChildren", "levelOrderLeaves", "connectedComponents", "matrixToList", "deleteVertexConnectivity", "aoeCritical"]);
     visualPanel.dataset.algo = current.id;
     visualPanel.dataset.scale = largeVisuals.has(current.id) ? "large" : "normal";
   }
@@ -410,7 +491,9 @@ function getAlgorithmSummary(algo) {
   const byId = {
     fact: "阶乘递归把 Fact(n) 拆成 n * Fact(n-1)，所以每次调用都必须让 n 变小。看到 Fact(0)=1 时递归停止，之后结果会沿调用栈一层层返回。",
     hanoi: "汉诺塔的关键不是乱试移动，而是把“大问题”拆成三步：先挪开 n-1 个小盘，移动最大盘，再把 n-1 个小盘挪回来。动画每一步都在执行这个固定套路。",
-    traversal: "三序遍历访问的是同一棵树，区别只在“什么时候记录根结点”。根先被记录是先序，夹在左右子树中间是中序，左右子树都处理完再记录是后序。",
+    preorderTraversal: "前序遍历的判断点是：一进入某棵子树，立刻先输出这棵子树的根，然后才去左子树和右子树。适合观察“从根开始展开结构”的过程。",
+    inorderTraversal: "中序遍历的判断点是：先把左子树全部处理完，再输出根，最后处理右子树。对 BST 来说，中序输出会天然得到从小到大的序列。",
+    postorderTraversal: "后序遍历的判断点是：根结点必须等左子树、右子树都处理完之后才输出。它特别适合删除树、统计子树信息这类“孩子先完成，父亲再汇总”的问题。",
     heightCount: "求高度、结点数、叶子数都可以递归完成，因为一棵树可以分成根、左子树、右子树。高度取左右较大值加 1，结点数左右相加再加根，叶子数只在没有孩子时计 1。",
     buildTree: "递归建树通常按文件或数组的顺序读结点。本题读到一行就创建当前结点，左/右标志为 1 才继续递归创建对应孩子；标志为 0 就说明该方向为空。",
     treeArray: "二叉链表转顺序存储时，要把指针关系翻译成数组下标关系。根放 1，左孩子放 2*i，右孩子放 2*i+1；这样即使某些位置为空，也能保留树的形状。",
@@ -445,6 +528,10 @@ function getAlgorithmSummary(algo) {
     bucket: "桶排序先按数值范围把元素分到不同桶中，让每个桶只处理一小段数据。桶内排序后按桶顺序拼接，如果数据分布均匀，整体效率会很好。"
   };
   const byGroup = {
+    "基础与复杂度": "复杂度题先找输入规模 n，再看循环/递归如何推进，最后保留最高阶。",
+    "线性表": "线性表题先判断顺序存储还是链式存储；顺序表看移动，链表看指针。",
+    "栈队串数组": "栈队串数组题先抓规则或公式：栈后进先出、队列先进先出、数组地址看存储优先级。",
+    "树与二叉树": "树题先看根、左右子树、遍历顺序和递归返回；普通树转换要牢记左孩子右兄弟。",
     "递归": "判断递归题：先找出口，再看规模是否变小，最后看返回值如何合并。",
     "实验四：二叉树与树": "判断树题：先明确当前结点，再看左子树和右子树分别如何递归处理。",
     "图": "判断图题：先确定存储结构，再看边、visited、栈/队列或集合如何变化。",
@@ -459,7 +546,9 @@ function getVisualGuide(algo, step) {
   const byId = {
     fact: "左侧展示的是递归调用栈。每点下一步，就相当于函数继续调用或开始返回；栈越长表示递归钻得越深，命中出口后才会一层层算回结果。",
     hanoi: "三根柱子表示 A、B、C，数字越大盘子越大。每一步只移动一个盘，目标是把所有盘从起点搬到目标柱，同时始终保持大盘不能压在小盘上。",
-    traversal: "同一棵四层二叉树会被按先序、中序、后序访问。高亮结点是当前访问位置，下方输出会不断追加；区别只在 visit 当前根结点的时机。",
+    preorderTraversal: "这棵树故意画得不对称：B 只有左路，D 只有右孩子，F 只有右孩子。前序看图时只记一句：碰到一棵子树先输出根，再向左，再向右。",
+    inorderTraversal: "这棵树故意画得不对称，方便看出“回到根”的时机。中序不是一看到根就输出，而是左边走完后才输出根，再转去右边。",
+    postorderTraversal: "这棵树故意画得不对称，方便观察返回过程。后序中叶子通常先出现，根 A 一定最后出现，因为左右子树要先全部完成。",
     heightCount: "这张图不是在改变树，而是在说明同一棵树可以计算不同指标：高度看最长路径，结点数看所有结点，叶子数只看没有孩子的结点。",
     buildTree: "这张图在模拟从文件逐行建树：下方每个小格是一行输入，1 表示还要递归创建对应子树；高亮边表示这一步把新结点挂到父结点下面。",
     treeArray: "树上的结点会被放进下方数组。根结点放在 1 号位，左孩子放 2*i，右孩子放 2*i+1；看图时重点观察树位置和数组下标如何对应。",
@@ -494,6 +583,10 @@ function getVisualGuide(algo, step) {
     bucket: "桶排序先按数值范围把元素分到不同桶里，再对桶内排序，最后按桶顺序拼接。数据分布越均匀，效果越好。"
   };
   const byGroup = {
+    "基础与复杂度": "这张图把循环次数、公式或递推过程画出来。先看变量怎么变，再看执行次数如何随 n 增长。",
+    "线性表": "这张图重点看元素移动或指针改接。顺序表通常看格子搬动，链表通常看 next/prior 如何变化。",
+    "栈队串数组": "这张图重点看栈顶、队头队尾、字符串长度、数组下标或公式。每一步都对应一个明确规则。",
+    "树与二叉树": "这张图重点看当前结点、左右子树、队列/栈或遍历序列。高亮结点就是当前处理位置。",
     "递归": "这张图展示递归拆解和回收结果的过程。看图时先找递归出口，再看当前问题怎样变成更小的问题。",
     "实验四：二叉树与树": "这张图围绕二叉树指针、递归和路径变化展开。高亮表示当前处理的结点，已变绿表示已经处理过。",
     "图": "这张图展示图的存储或遍历。重点看顶点、边、visited 标记，以及当前数据结构是矩阵、邻接表、栈还是队列。",
@@ -728,11 +821,23 @@ const knowledgeExtras = {
     mistakes:["死记 A、B、C 柱会乱，必须看当前层三根柱子的角色。", "移动最大盘前若没有先挪走 n-1 个小盘，规则就被破坏。"],
     practice:["能否写出移动 3 个盘的 7 步顺序？", "能否说明为什么步骤数是 2^n-1？", "能否在任意递归层指出辅助柱是哪一根？"]
   },
-  traversal: {
-    vars:["当前结点是递归正在处理的根。", "左子树和右子树本身也是树，所以可以继续套同一个遍历规则。", "输出序列只由访问根结点的时机决定。"],
-    scenarios:["先序常用于复制树或输出目录结构。", "中序遍历 BST 会得到递增序列。", "后序常用于先处理子结点再释放或汇总父结点。"],
-    mistakes:["把递归返回理解成重新从根开始，这是错误的；它会回到上一层暂停处。", "只背结果不看左右子树边界，四层树一复杂就容易错。"],
-    practice:["能否分别写出同一棵树的先序、中序、后序？", "能否解释为什么后序中根结点最后出现？", "能否在动画某一步指出当前递归属于哪棵子树？"]
+  preorderTraversal: {
+    vars:["当前结点就是当前子树的根。", "访问动作发生在进入左右子树之前。", "输出序列会先出现每棵子树的根，再出现它的后代。"],
+    scenarios:["适合复制树结构，因为先拿到根才能创建左右孩子。", "适合输出目录树、表达式树前缀形式等需要先看到父结点的场景。"],
+    mistakes:["进入一个结点后还先去找最左叶子，这是中序思路，不是前序。", "遇到只有右孩子的结点时忘记继续访问右子树。"],
+    practice:["能否说出 A 为什么一定是第一个输出？", "能否解释 B 之后为什么是 D，而不是 C？", "能否用根-左-右写出任意小子树的前序？"]
+  },
+  inorderTraversal: {
+    vars:["左子树必须先完成。", "根结点夹在左子树输出和右子树输出之间。", "对 BST 来说，中序输出会递增。"],
+    scenarios:["适合从 BST 中得到有序序列。", "适合配合先序或后序还原二叉树，因为中序能切分左右子树。"],
+    mistakes:["一看到根就输出，会把中序写成前序。", "处理完左孩子后忘记回到父结点输出根。"],
+    practice:["能否说明 D 为什么排在 H 前面？", "能否解释 A 为什么不是第一个也不是最后一个？", "能否把每个结点标成“左完-根-右”的执行顺序？"]
+  },
+  postorderTraversal: {
+    vars:["左子树和右子树都完成后才能访问根。", "根结点通常出现在自己整棵子树输出的最后。", "返回上一层时，当前子树已经完整处理完。"],
+    scenarios:["适合删除或释放整棵树，因为必须先释放孩子再释放父结点。", "适合计算子树高度、结点数、表达式树求值等需要孩子结果再汇总父结点的任务。"],
+    mistakes:["叶子访问完就忘记回到父结点继续判断右子树。", "在左右子树没完成时提前输出根。"],
+    practice:["能否说明 A 为什么一定最后输出？", "能否解释 H 为什么在 D 前面？", "能否判断某个结点能否输出：只看它的左右子树是否都完成？"]
   },
   heightCount: {
     vars:["left 保存左子树递归得到的结果。", "right 保存右子树递归得到的结果。", "不同问题只改变合并公式：高度取最大，结点数相加，叶子数判断无孩子。"],
@@ -931,7 +1036,9 @@ function getKnowledge(algo) {
   const detailById = {
     fact: { idea:"阶乘递归只解决一个问题：Fact(n)=n*Fact(n-1)。它把大问题不断缩小到 Fact(0)=1 或 Fact(1)=1，再沿调用栈逐层乘回去。", process:"执行时先检查递归出口；没到出口就保存当前 n，调用更小的 Fact(n-1)。底层返回后，上一层才继续完成 n * 子结果。", tips:"最容易错的是没有出口，或者递归参数没有变小。阶乘递归没有分支选择，时间和调用栈空间都随 n 线性增长。" },
     hanoi: { idea:"汉诺塔把移动 n 个盘拆成三步：先移动 n-1 个小盘，移动最大盘，再移动 n-1 个小盘。每次递归只是柱子的角色发生变化。", process:"Hanoi(n,A,B,C) 中 A 是起点，B 是辅助，C 是目标。先 Hanoi(n-1,A,C,B)，再移动 A 到 C，最后 Hanoi(n-1,B,A,C)。", tips:"不要死记柱子名字，要看起点、辅助、目标的角色。步骤数是 2^n-1，盘数增加一点，动画步骤会明显变多。" },
-    traversal: { idea:"二叉树三序遍历的框架相同，差别只是访问根结点的时机：先序先访问根，中序夹在左右子树中间，后序最后访问根。", process:"递归进入一棵子树后，按照当前遍历规则处理根、左、右。到空指针返回，到叶子后也会返回上一层继续处理未走完的右子树。", tips:"看四层树时先看一个小子树的输出，再推广到整棵树。不要忘记递归会回到之前暂停的位置继续执行。" },
+    preorderTraversal: { idea:"前序遍历把根放在最前面，规则是根、左、右。它像先写目录标题，再展开目录下面的内容。", process:"从 A 开始先输出 A，再进入 A 的左子树 B；进入 B 时又先输出 B，再继续进入 D。遇到空孩子就返回上一层，左边处理完后再处理右子树 C。", tips:"判断前序时不要等孩子结束，看到当前子树根就立刻输出。参差树上如果某个结点没有左孩子，就直接跳到它的右孩子。" },
+    inorderTraversal: { idea:"中序遍历把根放在左子树和右子树中间，规则是左、根、右。它强调“先走到最左，再回头输出根”。", process:"从 A 出发不能马上输出 A，要先进入左子树 B；B 又先进入 D。D 没有左孩子，所以输出 D，再去 D 的右孩子 H。左侧全部结束后才回到 B、再回到 A。", tips:"中序最容易错在过早输出根。做题时可以在每个结点旁边写成“左完才根，根完才右”。" },
+    postorderTraversal: { idea:"后序遍历把根放在最后，规则是左、右、根。它体现先处理孩子、最后处理父结点的思想。", process:"从 A 出发先递归左子树 B；B 的 D 子树里要先处理 H，再回到 D，最后回到 B。整棵左子树、右子树都输出完以后，A 才能最后输出。", tips:"后序题可以反复问自己：这个结点的左右子树都完成了吗？没完成就不能输出这个结点。" },
     heightCount: { idea:"高度、结点数、叶子数都基于同一棵树递归，但合并方式不同：高度取 max，结点数做加法，叶子数先判断是否无孩子。", process:"空树返回 0；非空结点递归求左右子树结果。高度返回 max(left,right)+1，结点数返回 left+right+1，叶子数遇到叶子返回 1。", tips:"叶子必须左右孩子都为空，只有一个孩子的结点不是叶子。高度看最长路径，不是结点总数。" },
     buildTree: { idea:"二叉树递归建树按文件先序记录创建结点：先读当前结点，再根据左右标志递归创建左子树和右子树。", process:"读到一行就 new 一个结点，把 data 填进去；左标志为 1 就继续读后续行建左孩子，右标志为 1 就建右孩子，否则对应指针为空。", tips:"读文件位置 i 必须在递归层之间共享，所以常用引用传递。还要保存当前行 k，避免建左子树时 i 改变后右标志判断错位。" },
     treeArray: { idea:"二叉链表转顺序存储利用完全二叉树编号：根在 i，左孩子在 2*i，右孩子在 2*i+1。", process:"递归访问当前结点，把它写入数组位置 i；再把左孩子写入 2*i，把右孩子写入 2*i+1。空结点直接返回。", tips:"普通二叉树不一定满，顺序数组可能出现空位。这个方法查父子位置方便，但稀疏树会浪费空间。" },
@@ -1071,6 +1178,21 @@ function stop() {
   $("playBtn").textContent = "▶ 播放";
 }
 
+function positionCodePanel() {
+  const panel = $("codePanel");
+  const visualPanel = document.querySelector(".visualPanel");
+  const guide = $("visualSummary");
+  const controls = document.querySelector(".controls");
+  if (!panel || !visualPanel || !controls) return;
+  const visualRect = visualPanel.getBoundingClientRect();
+  const guideRect = guide ? guide.getBoundingClientRect() : visualRect;
+  const controlsRect = controls.getBoundingClientRect();
+  const gap = 10;
+  panel.style.left = `${Math.max(8, visualRect.left + 14)}px`;
+  panel.style.right = `${Math.max(8, window.innerWidth - visualRect.right + 14)}px`;
+  panel.style.top = `${Math.max(8, guideRect.top)}px`;
+  panel.style.bottom = `${Math.max(88, window.innerHeight - controlsRect.top + gap)}px`;
+}
 function updateStepButtons() {
   const atEnd = stepIndex >= steps.length - 1;
   const atStart = stepIndex <= 0;
@@ -1103,8 +1225,8 @@ function initNav() {
   });
 }
 
-function treeSvg(active = [], done = [], activeEdges = []) {
-  const nodes = tree.nodes;
+function treeSvgFrom(treeData, active = [], done = [], activeEdges = []) {
+  const nodes = treeData.nodes;
   const edges = Object.entries(nodes).flatMap(([k, n]) => [n.l && [k, n.l], n.r && [k, n.r]].filter(Boolean));
   return `<div class="svgWrap"><svg viewBox="0 -20 800 410" width="800">
     ${edges.map(([a,b]) => `<line class="edge ${activeEdges.some(e => e[0]===a && e[1]===b) ? "active" : ""}" x1="${nodes[a].x}" y1="${nodes[a].y}" x2="${nodes[b].x}" y2="${nodes[b].y}"/>`).join("")}
@@ -1112,6 +1234,10 @@ function treeSvg(active = [], done = [], activeEdges = []) {
       <circle cx="${n.x}" cy="${n.y}" r="23"></circle><text x="${n.x}" y="${n.y}">${k}</text>
     </g>`).join("")}
   </svg></div>`;
+}
+
+function treeSvg(active = [], done = [], activeEdges = []) {
+  return treeSvgFrom(tree, active, done, activeEdges);
 }
 
 function graphSvg(active = [], done = [], activeEdges = []) {
@@ -1240,17 +1366,58 @@ function renderHanoi(el, step) {
   el.innerHTML = `<div class="row" style="gap:40px">${peg("A", step.pegs.A)}${peg("B", step.pegs.B)}${peg("C", step.pegs.C)}</div><div class="formula">本步移动：${step.move || "分解任务"}</div>`;
 }
 
-function buildTraversalSteps() {
-  const seqs = [
-    ["先序", ["A","B","D","H","I","E","J","K","C","F","L","M","G","N","O"], "根-左-右：visit 放在两个递归前。"],
-    ["中序", ["H","D","I","B","J","E","K","A","L","F","M","C","N","G","O"], "左-根-右：visit 放在两个递归中间。"],
-    ["后序", ["H","I","D","J","K","E","B","L","M","F","N","O","G","C","A"], "左-右-根：visit 放在两个递归后。"]
-  ];
-  return seqs.flatMap(([name, seq, desc]) => seq.map((node, i) => ({ text:`${name}遍历：访问 ${node}。${desc}`, active:[node], done:seq.slice(0,i), state:{遍历类型:name, 输出:seq.slice(0,i+1).join(" ")}, defense:"判断遍历类型只看 visit(T) 在递归调用前、中、后。"})));
+function buildTraversalModeSteps(mode) {
+  const configs = {
+    preorder: {
+      name: "前序",
+      rule: "根-左-右",
+      seq: ["A","B","D","H","C","E","I","J","F","K"],
+      explain: "先访问当前根，再递归左子树，最后递归右子树。",
+      reason: node => `${node} 是当前子树的根，所以前序要在进入它的孩子之前先输出 ${node}。`
+    },
+    inorder: {
+      name: "中序",
+      rule: "左-根-右",
+      seq: ["D","H","B","A","I","E","J","C","F","K"],
+      explain: "先把左子树走完，回到根时输出根，再递归右子树。",
+      reason: node => `已经处理完 ${node} 的左侧部分，所以中序现在回到并输出 ${node}，之后再看右侧。`
+    },
+    postorder: {
+      name: "后序",
+      rule: "左-右-根",
+      seq: ["H","D","B","I","J","E","K","F","C","A"],
+      explain: "必须等左右子树都处理完，最后才输出当前根。",
+      reason: node => `${node} 的左右子树已经完成，所以后序最后输出这个根结点 ${node}。`
+    }
+  };
+  const cfg = configs[mode];
+  return cfg.seq.map((node, i) => ({
+    text: `${cfg.name}遍历第 ${i + 1} 步：访问 ${node}。${cfg.reason(node)}`,
+    active: [node],
+    done: cfg.seq.slice(0, i),
+    state: { 遍历类型: cfg.name, 访问规则: cfg.rule, 输出: cfg.seq.slice(0, i + 1).join(" ") },
+    defense: `${cfg.name}遍历口诀是“${cfg.rule}”。${cfg.explain}`
+  }));
+}
+
+function buildPreorderSteps() {
+  return buildTraversalModeSteps("preorder");
+}
+
+function buildInorderSteps() {
+  return buildTraversalModeSteps("inorder");
+}
+
+function buildPostorderSteps() {
+  return buildTraversalModeSteps("postorder");
 }
 
 function renderTraversal(el, step) {
   el.innerHTML = treeSvg(step.active || [], step.done || []) + `<div class="formula">输出：${step.state?.输出 || ""}</div>`;
+}
+
+function renderIrregularTraversal(el, step) {
+  el.innerHTML = treeSvgFrom(traversalTree, step.active || [], step.done || []) + `<div class="formula">输出：${step.state?.输出 || ""}</div>`;
 }
 
 function buildTreeMetricSteps() {
@@ -2127,7 +2294,408 @@ function dijkstraGraphSvg(active = [], done = []) {
   </svg></div>`;
 }
 
-function clone(x) { return x.map(r => r.slice()); }
+
+function buildComplexityLoopSteps() {
+  return [
+    { text:"单循环：i 从 1 到 n，每轮执行一次，所以执行次数随 n 线性增长。", panels:["for i=1..n", "执行 n 次", "时间 O(n)"], state:{循环:"单循环", 复杂度:"O(n)"} },
+    { text:"双重循环：外层 n 次，内层也约 n 次，总次数约 n*n。", panels:["for i=1..n", "for j=1..n", "时间 O(n²)"], state:{循环:"嵌套循环", 复杂度:"O(n²)"} },
+    { text:"折半循环：每轮规模除以 2，n、n/2、n/4...，能除多少次才到 1。", panels:["n -> n/2 -> n/4", "约 log₂n 次", "时间 O(log n)"], state:{循环:"折半", 复杂度:"O(log n)"}, defense:"复杂度看增长趋势，只保留最高阶并忽略常数。" }
+  ];
+}
+function renderComplexityLoop(el, step) {
+  el.innerHTML = `<div class="row">${step.panels.map((p,i)=>`<div class="cell ${i===step.panels.length-1?'active':''}">${escapeHtml(p)}</div>`).join("")}</div><div class="formula">判断顺序：变量怎么变 → 执行多少轮 → 保留最高阶。</div>`;
+}
+
+function buildLinearInsertDeleteSteps() {
+  let a = ["A","B","C","D","E","F"];
+  const steps = [
+    { text:"顺序表删除第 i 个元素时，后面的元素必须依次左移来填补空位。准备删除 A[2]=C。", arr:a.slice(), active:[2], done:[], state:{操作:"删除", i:2, 移动次数:"n-i-1=3"} },
+    { text:"C 被删除后，A[2] 出现空位；D、E、F 都要向左移动一格。", arr:["A","B","空位","D","E","F"], active:[2,3,4,5], hole:2, state:{空位:2} },
+    { text:"左移完成，表长减 1。删除位置越靠前，需要移动的元素越多。", arr:["A","B","D","E","F"], active:[2,3,4], done:[0,1,2,3,4], state:{表长:5} },
+    { text:"顺序表插入时相反：为了在 A[2] 插入 X，先从表尾开始把元素向右挪，避免覆盖。", arr:["A","B","D","E","F","空位"], active:[2,5], hole:2, state:{操作:"插入", 插入值:"X"} },
+    { text:"D、E、F 右移后，A[2] 留出空位。注意必须从右往左移动。", arr:["A","B","空位","D","E","F"], active:[2,3,4,5], hole:2, state:{空位:2} },
+    { text:"把 X 放入 A[2]，表长加 1。", arr:["A","B","X","D","E","F"], active:[2], done:[0,1,2,3,4,5], state:{结果:"A,B,X,D,E,F"}, defense:"顺序表能 O(1) 随机访问，但插入删除常常要 O(n) 移动。" }
+  ];
+  return steps;
+}
+
+function buildLinkedDedupSteps() {
+  return [
+    { text:"有序链表中重复元素一定相邻。p 指向当前保留结点，检查 p->next 是否重复。", values:[1,1,2,3,3,4], active:[0,1], removed:[], state:{p:"第1个 1", 比较:"1 和 1"} },
+    { text:"p->data 等于 p->next->data，保存 q=p->next，再让 p->next=q->next，第二个 1 被跳过。", values:[1,1,2,3,3,4], active:[0,1], removed:[1], state:{删除:"第二个 1"} },
+    { text:"p 仍停在第一个 1，继续检查下一个结点 2；不相等，p 向后移动。", values:[1,2,3,3,4], active:[0,1], removed:[], state:{p:"1 -> 2"} },
+    { text:"移动到 3 时，发现后面也是 3，同样删除重复结点。", values:[1,2,3,3,4], active:[2,3], removed:[3], state:{删除:"第二个 3"} },
+    { text:"扫描结束，链表变成 1 -> 2 -> 3 -> 4。", values:[1,2,3,4], active:[], removed:[], done:[0,1,2,3], state:{结果:"1->2->3->4"}, defense:"链表删除前必须保存 q，否则被删结点后面的链可能丢失。" }
+  ];
+}
+function renderLinkedList(el, step) {
+  const removed = new Set(step.removed || []), active = new Set(step.active || []), done = new Set(step.done || []);
+  el.innerHTML = `<div class="row">${step.values.map((v,i)=>`<div><div class="cell ${active.has(i)?'active':''} ${done.has(i)?'done':''} ${removed.has(i)?'bad':''}">${v}</div><div class="index">${i}</div></div>${i<step.values.length-1?'<span class="formula">→</span>':''}`).join("")}</div><div class="formula">链表核心：改 next 指针，不移动元素本身。</div>`;
+}
+
+function buildOrderedIntersectionSteps() {
+  const A=[1,3,5,7,9], B=[3,4,5,8,9], result=[];
+  const steps=[{text:"两个有序表求交集，i 指向 A，j 指向 B。小的一方先前进。", A, B, i:0, j:0, result:[], state:{规则:"小者前进，相等保留"}}];
+  let i=0,j=0;
+  while(i<A.length && j<B.length){
+    steps.push({text:`比较 A[${i}]=${A[i]} 和 B[${j}]=${B[j]}。`, A, B, i, j, result:result.slice(), state:{i,j}});
+    if(A[i]===B[j]){ result.push(A[i]); steps.push({text:`两边相等，${A[i]} 属于交集，加入结果；i、j 同时后移。`, A, B, i, j, result:result.slice(), state:{加入:A[i]}}); i++; j++; }
+    else if(A[i]<B[j]){ steps.push({text:`A[${i}] 更小，说明 ${A[i]} 不可能在 B 当前及后面出现，i 后移。`, A, B, i, j, result:result.slice()}); i++; }
+    else { steps.push({text:`B[${j}] 更小，j 后移。`, A, B, i, j, result:result.slice()}); j++; }
+  }
+  steps.push({text:`交集完成：${result.join(", ")}。`, A, B, i:-1, j:-1, result, state:{结果:result.join(",")}, defense:"有序表双指针不需要回头，所以时间复杂度 O(m+n)。"});
+  return steps;
+}
+function renderDualList(el, step) {
+  const row = (name, arr, active) => `<div><div class="label">${name}</div><div class="row">${arr.map((v,i)=>`<div><div class="cell ${i===active?'active':''}">${v}</div><div class="index">${i}</div></div>`).join("")}</div></div>`;
+  el.innerHTML = row("A", step.A, step.i) + row("B", step.B, step.j) + `<div><div class="label">交集结果</div><div class="row">${(step.result||[]).map(v=>`<div class="cell done">${v}</div>`).join("") || '<span class="formula">空</span>'}</div></div>`;
+}
+
+function buildStackSequenceSteps() {
+  const push=[1,2,3,4,5], pop=[4,5,3,2,1];
+  const stack=[], steps=[]; let j=0;
+  steps.push({text:`判断 ${pop.join(",")} 是否可能是 1..5 的出栈序列。`, stack:[], out:[], state:{目标出栈:pop.join(",")}});
+  for(let i=0;i<push.length;i++){
+    stack.push(push[i]);
+    steps.push({text:`压入 ${push[i]}。如果栈顶等于下一个目标出栈元素，就可以出栈。`, stack:stack.slice(), out:pop.slice(0,j), active:push[i], state:{栈顶:stack[stack.length-1], 下一个目标:pop[j]}});
+    while(stack.length && stack[stack.length-1]===pop[j]){
+      const x=stack.pop(); j++;
+      steps.push({text:`栈顶 ${x} 正好等于目标 ${x}，弹出。`, stack:stack.slice(), out:pop.slice(0,j), active:x, state:{已匹配:pop.slice(0,j).join(",")}});
+    }
+  }
+  steps.push({text:`所有目标都匹配成功，所以该出栈序列合法。`, stack:stack.slice(), out:pop.slice(0,j), state:{结果:"合法"}, defense:"目标不在栈顶就只能继续压栈；如果输入用完仍无法匹配，就是非法序列。"});
+  return steps;
+}
+function renderStackSequence(el, step) {
+  el.innerHTML = `<div class="row"><div><div class="label">栈底 → 栈顶</div><div class="stackQueue">${(step.stack||[]).map(x=>`<div class="token">${x}</div>`).join("") || '<span class="formula">空</span>'}</div></div><div><div class="label">已出栈</div><div class="stackQueue">${(step.out||[]).map(x=>`<div class="token done">${x}</div>`).join("") || '<span class="formula">空</span>'}</div></div></div>`;
+}
+
+function buildCircularQueueSteps() {
+  const m=6; let q=Array(m).fill(""), front=0, rear=0;
+  const steps=[];
+  const snap=(text,active,state={})=>steps.push({text,q:q.slice(),front,rear,active,state:{front,rear,长度:`(${rear}-${front}+${m})%${m}=${(rear-front+m)%m}`,...state}});
+  snap("初始循环队列为空：front=rear=0。", null, {状态:"空"});
+  for(const x of ["A","B","C","D"]){ q[rear]=x; rear=(rear+1)%m; snap(`入队 ${x}：先写 rear 位置，再 rear=(rear+1)%m。`, (rear-1+m)%m); }
+  const out=q[front]; q[front]=""; front=(front+1)%m; snap(`出队 ${out}：front 向后移动一格。`, front, {出队:out});
+  for(const x of ["E","F"]){ q[rear]=x; rear=(rear+1)%m; snap(`入队 ${x}，rear 可能绕回数组前面。`, (rear-1+m)%m); }
+  snap("若牺牲一个单元，(rear+1)%m==front 表示队满。", null, {判满:`(${rear}+1)%${m}==${front}`});
+  return steps;
+}
+function renderCircularQueue(el, step) {
+  el.innerHTML = `<div class="row">${step.q.map((v,i)=>`<div><div class="cell ${i===step.active?'active':''} ${i===step.front?'done':''} ${i===step.rear?'bad':''}">${v||'空'}</div><div class="index">${i}${i===step.front?' F':''}${i===step.rear?' R':''}</div></div>`).join("")}</div><div class="formula">循环队列通过取模让 front/rear 到末尾后回到 0。</div>`;
+}
+
+function buildStringSubstringsSteps() {
+  const s="ABCD";
+  const steps=[1,2,3,4].map(len=>({text:`长度为 ${len} 的子串有 ${s.length-len+1} 个。`, s, subs:Array.from({length:s.length-len+1},(_,i)=>s.slice(i,i+len)), state:{长度:len, 个数:s.length-len+1}}));
+  steps.push({text:"总数 = 4+3+2+1 = n(n+1)/2 = 10。", s, subs:["总数 10"], state:{公式:"n(n+1)/2"}, defense:"空串若也计入，需要再加 1。"});
+  return steps;
+}
+function renderStringSubstrings(el, step) {
+  el.innerHTML = `<div class="formula">原串：${step.s}</div><div class="row">${step.subs.map(x=>`<div class="cell active">${x}</div>`).join("")}</div>`;
+}
+
+function buildArrayAddressSteps() {
+  return [
+    {text:"行优先存储先按行连续存放。设 A[0..2][0..3]，基地址 1000，每个元素 4 字节。", active:[0,0], state:{基地址:1000, 元素大小:4}},
+    {text:"要求 A[2][3]：它前面有 2 整行，每行 4 个元素，再加本行前 3 个元素，共 2*4+3=11 个元素。", active:[2,3], state:{偏移元素数:"2*4+3=11"}},
+    {text:"地址 = 1000 + 11*4 = 1044。列优先则要先按列计算。", active:[2,3], state:{地址:1044}, defense:"地址题先确认行优先还是列优先，再写上下界和元素大小。"}
+  ];
+}
+function renderArrayAddress(el, step) {
+  el.innerHTML = `<div class="matrix" style="grid-template-columns: repeat(5, 58px)"><div></div>${[0,1,2,3].map(j=>`<div class="matrixCell head">列${j}</div>`).join("")}${[0,1,2].map(i=>`<div class="matrixCell head">行${i}</div>${[0,1,2,3].map(j=>`<div class="matrixCell ${step.active?.[0]===i&&step.active?.[1]===j?'one':''}">A${i}${j}</div>`).join("")}`).join("")}</div>`;
+}
+
+function buildSparseMatrixSteps() {
+  const mat=[[0,0,5,0],[0,0,0,0],[7,0,0,2],[0,9,0,0]];
+  const triples=[]; const steps=[{text:"稀疏矩阵大多数元素为 0，所以只记录非零元素的行、列、值。", mat, triples:[], active:null}];
+  mat.forEach((row,i)=>row.forEach((v,j)=>{ if(v!==0){ triples.push([i,j,v]); steps.push({text:`发现非零元素 A[${i}][${j}]=${v}，记录三元组 (${i}, ${j}, ${v})。`, mat, triples:triples.slice(), active:[i,j], state:{三元组:`(${i},${j},${v})`}}); }}));
+  steps.push({text:"扫描完成，只保存 4 个非零元素，而不是保存 16 个矩阵格。", mat, triples, active:null, state:{非零个数:triples.length}, defense:"稀疏矩阵压缩适合非零元素远少于总元素数的情况。"});
+  return steps;
+}
+function renderSparseMatrix(el, step) {
+  el.innerHTML = `<div class="matrix" style="grid-template-columns: repeat(5, 44px)"><div></div>${[0,1,2,3].map(j=>`<div class="matrixCell head">${j}</div>`).join("")}${step.mat.map((row,i)=>`<div class="matrixCell head">${i}</div>${row.map((v,j)=>`<div class="matrixCell ${step.active?.[0]===i&&step.active?.[1]===j?'one':''}">${v}</div>`).join("")}`).join("")}</div><div class="row">${(step.triples||[]).map(t=>`<div class="cell done">(${t.join(',')})</div>`).join("")}</div>`;
+}
+
+function buildGeneralizedListSteps() {
+  return [
+    {text:"广义表 L=(a,(b,c),d)。head(L) 取第一个元素 a。", expr:"L = (a,(b,c),d)", result:"head(L)=a"},
+    {text:"tail(L) 取除第一个元素外剩余部分，仍然是一个表：((b,c),d)。", expr:"tail(L)", result:"((b,c),d)"},
+    {text:"head(tail(L)) 取剩余表的第一个元素，得到子表 (b,c)。", expr:"head(tail(L))", result:"(b,c)"},
+    {text:"head(head(tail(L))) 再取子表 (b,c) 的表头，得到原子 b。", expr:"head(head(tail(L)))", result:"b", defense:"head 取表头元素，tail 取表尾子表；多层嵌套时每次只做一步。"}
+  ];
+}
+function renderGeneralizedList(el, step) {
+  el.innerHTML = `<div class="formula" style="font-size:28px">${escapeHtml(step.expr)}</div><div class="row"><div class="cell active">${escapeHtml(step.result)}</div></div>`;
+}
+
+function letterTree() {
+  return {key:"A", left:{key:"B", left:{key:"D", left:{key:"H"}, right:{key:"I"}}, right:{key:"E", left:{key:"J"}, right:{key:"K"}}}, right:{key:"C", left:{key:"F", left:{key:"L"}, right:{key:"M"}}, right:{key:"G", left:{key:"N"}, right:{key:"O"}}}};
+}
+function buildRestoreTreeSteps() {
+  const full={key:"A",left:{key:"B",left:{key:"D"},right:{key:"E"}},right:{key:"C",left:{key:"F"},right:{key:"G"}}};
+  return [
+    {text:"先序 ABDECFG 的第一个 A 是根。", tree:{key:"A"}, active:["A"], state:{先序:"ABDECFG", 中序:"DBEAFCG", 根:"A"}},
+    {text:"在中序 DBEAFCG 中找到 A，左边 DBE 是左子树，右边 FCG 是右子树。", tree:{key:"A",left:{key:"?"},right:{key:"?"}}, active:["A"], state:{左子树:"DBE", 右子树:"FCG"}},
+    {text:"左子树先序 BDE，所以 B 是左子树根；中序 D B E 切出 D 和 E。", tree:{key:"A",left:{key:"B",left:{key:"D"},right:{key:"E"}},right:{key:"?"}}, active:["B"]},
+    {text:"右子树先序 CFG，所以 C 是右子树根；中序 F C G 切出 F 和 G。还原完成。", tree:full, active:["C"], state:{完成:"A(B(D,E),C(F,G))"}, defense:"先序/后序负责找根，中序负责切左右子树。"}
+  ];
+}
+function renderRestoreTree(el, step) { el.innerHTML = renderTreeSvg(step.tree, step.active || []); }
+
+function buildThreadedTreeSteps() {
+  return [
+    {text:"中序遍历序列为 H D I B J E K A L F M C N G O。线索化要按这个顺序处理前驱和后继。", active:["H"], seq:["H","D","I","B","J","E","K","A","L","F","M","C","N","G","O"], state:{当前:"H"}},
+    {text:"处理 D：它的中序前驱是 H，后继是 I。如果 D 的某个孩子指针为空，就可改作线索。", active:["D"], seq:["H","D","I"], state:{前驱:"H", 当前:"D", 后继:"I"}},
+    {text:"处理 B：中序前驱是 I，后继是 J。线索指针让遍历时不用递归或栈也能找下一个结点。", active:["B"], seq:["I","B","J"], state:{前驱:"I", 后继:"J"}},
+    {text:"线索化完成后，空左指针可指向前驱，空右指针可指向后继，同时用 ltag/rtag 区分孩子还是线索。", active:["A"], seq:["H","D","I","B","J","E","K","A","L","F","M","C","N","G","O"], state:{标志:"0=孩子，1=线索"}, defense:"线索二叉树利用空指针域，目的不是改变遍历序列，而是加快找前驱/后继。"}
+  ];
+}
+function renderThreadedTree(el, step) {
+  el.innerHTML = treeSvg(step.active || []) + `<div class="row">${(step.seq||[]).map(x=>`<div class="cell ${step.active?.includes(x)?'active':''}">${x}</div>`).join("")}</div><div class="formula">中序线索：空左指针→前驱，空右指针→后继。</div>`;
+}
+
+function buildForestTransformSteps() {
+  return [
+    {text:"森林有两棵树：A 的孩子 B、C；D 的孩子 E、F。先把每棵树内部改成左孩子右兄弟。", active:["A","B","C"], state:{规则:"第一个孩子走左，兄弟走右"}},
+    {text:"A.left=B，B.right=C；D.left=E，E.right=F。", active:["A","B","C","D","E","F"], state:{内部转换:"完成"}},
+    {text:"森林中第二棵树的根 D 作为第一棵树根 A 的右兄弟，因此 A.right=D。", active:["A","D"], state:{森林连接:"A.right=D"}},
+    {text:"转换完成后，左指针表示孩子，右指针表示兄弟或下一棵树根。", active:["A","B","C","D","E","F"], defense:"树/森林转二叉树时，右指针常表示兄弟，不是普通意义的右孩子。"}
+  ];
+}
+function renderForestTransform(el, step) {
+  const active=new Set(step.active||[]);
+  const nodes={A:[180,80],B:[120,190],C:[260,190],D:[460,80],E:[400,190],F:[540,190]};
+  const edges=[["A","B"],["B","C"],["A","D"],["D","E"],["E","F"]];
+  el.innerHTML=`<div class="svgWrap"><svg viewBox="0 0 700 280" width="700">${edges.map(([a,b])=>`<line class="edge ${active.has(a)&&active.has(b)?'active':''}" x1="${nodes[a][0]}" y1="${nodes[a][1]}" x2="${nodes[b][0]}" y2="${nodes[b][1]}"/>`).join("")}${Object.entries(nodes).map(([n,[x,y]])=>`<g class="node ${active.has(n)?'active':''}"><circle cx="${x}" cy="${y}" r="27"/><text x="${x}" y="${y}">${n}</text></g>`).join("")}</svg></div><div class="formula">左孩子右兄弟：left=第一个孩子，right=下一个兄弟/下一棵树根。</div>`;
+}
+
+function buildHuffmanSteps() {
+  let forest=[5,9,12,13,16,45];
+  const steps=[{text:"初始森林中每个权值都是一棵单结点树。", forest:forest.slice(), merges:[], wpl:0, active:[]}];
+  const merges=[]; let wpl=0;
+  while(forest.length>1){ forest.sort((a,b)=>a-b); const a=forest.shift(), b=forest.shift(), c=a+b; wpl+=c; merges.push(`${a}+${b}=${c}`); forest.push(c); steps.push({text:`取最小两个权值 ${a} 和 ${b} 合并成 ${c}，把 ${c} 放回森林。`, forest:forest.slice().sort((x,y)=>x-y), merges:merges.slice(), wpl, active:[a,b,c], state:{本次合并:`${a}+${b}=${c}`, WPL累加:wpl}}); }
+  steps.push({text:`只剩一棵树，Huffman 构造完成。WPL 可用每次合并权值之和累加得到：${wpl}。`, forest, merges, wpl, active:forest, defense:"Huffman 每次必须选当前最小的两棵树，不能凭感觉挑。"});
+  return steps;
+}
+function renderHuffman(el, step) {
+  el.innerHTML=`<div><div class="label">当前森林权值</div><div class="row">${(step.forest||[]).map(v=>`<div class="cell ${step.active?.includes(v)?'active':''}">${v}</div>`).join("")}</div></div><div><div class="label">合并记录</div><div class="stackQueue">${(step.merges||[]).map(x=>`<div class="token">${x}</div>`).join("")||'<span class="formula">暂无</span>'}</div></div><div class="formula">当前 WPL 累加 = ${step.wpl||0}</div>`;
+}
+
+function buildNonRecursivePreorderSteps() {
+  const children={A:["B","C"],B:["D","E"],C:["F","G"],D:["H","I"],E:["J","K"],F:["L","M"],G:["N","O"]};
+  const stack=["A"], out=[], steps=[{text:"先把根 A 入栈。非递归先序用栈模拟递归。", stack:stack.slice(), out:[], active:["A"], tree:letterTree()}];
+  while(stack.length){ const x=stack.pop(); out.push(x); const [l,r]=children[x]||[]; if(r) stack.push(r); if(l) stack.push(l); steps.push({text:`弹出并访问 ${x}。先把右孩子入栈，再把左孩子入栈，所以下一步会先访问左孩子。`, stack:stack.slice(), out:out.slice(), active:[x], tree:letterTree(), state:{访问:x, 输出:out.join(" ")}}); }
+  return steps;
+}
+function renderTreeStack(el, step) { el.innerHTML = renderTreeSvg(step.tree, step.active||[]) + `<div><div class="label">栈</div><div class="stackQueue">${(step.stack||[]).map(x=>`<div class="token">${x}</div>`).join("")||'<span class="formula">空</span>'}</div></div><div class="formula">输出：${(step.out||[]).join(" ")}</div>`; }
+
+function buildDeleteSubtreeSteps() {
+  const before=letterTree();
+  const after={key:"A", left:null, right:before.right};
+  return [
+    {text:"目标是删除以 B 为根的整棵子树。先从根 A 开始查找 B。", tree:before, active:["A"], state:{目标:"B"}},
+    {text:"找到 B 后，不能只删 B；还要释放 B 的所有后代，所以通常用后序思想先删孩子。", tree:before, active:["B","D","E"], state:{子树:"B-D/E-H/I/J/K"}},
+    {text:"后序释放 H、I、D、J、K、E，最后释放 B。", tree:before, active:["H","I","D","J","K","E","B"], state:{释放顺序:"孩子先，根最后"}},
+    {text:"把 A.left 置为空，删除完成。", tree:after, active:["A"], state:{结果:"A 的左子树为空"}, defense:"删除子树要避免内存泄漏，先释放子孙，再断开父结点指针。"}
+  ];
+}
+function buildSwapChildrenSteps() {
+  const before=letterTree();
+  const after={key:"A", left:before.right, right:before.left};
+  return [
+    {text:"交换左右孩子是典型树递归：先交换当前结点 A 的 left 和 right。", tree:before, active:["A"], state:{当前:"A"}},
+    {text:"递归进入原来的左子树 B，同样交换 B 的左右孩子 D、E。", tree:before, active:["B","D","E"], state:{当前:"B"}},
+    {text:"递归进入原来的右子树 C，交换 F、G。所有结点都按同样规则处理。", tree:before, active:["C","F","G"], state:{当前:"C"}},
+    {text:"整棵树左右镜像完成。", tree:after, active:["A"], state:{结果:"左右镜像"}, defense:"递归交换时，每个结点只负责交换自己的两个孩子，然后把同样任务交给左右子树。"}
+  ];
+}
+function renderTreeMutation(el, step) { el.innerHTML = renderTreeSvg(step.tree, step.active||[]); }
+
+function buildConnectedComponentsSteps() {
+  const pos={0:[120,100],1:[220,70],2:[220,160],3:[420,100],4:[520,70],5:[520,160]};
+  const edges=[[0,1],[0,2],[3,4],[4,5]];
+  return [
+    {text:"从顶点 0 开始 DFS，访问 0、1、2，得到第 1 个连通分量。", pos, edges, active:[0,1,2], done:[0,1,2], comps:[[0,1,2]], state:{分量1:"0,1,2"}},
+    {text:"继续扫描顶点 3，发现它未访问，于是从 3 再启动一次 DFS。", pos, edges, active:[3], done:[0,1,2,3], comps:[[0,1,2]], state:{新起点:3}},
+    {text:"访问 3、4、5，得到第 2 个连通分量。所有顶点扫描完毕。", pos, edges, active:[3,4,5], done:[0,1,2,3,4,5], comps:[[0,1,2],[3,4,5]], state:{分量2:"3,4,5"}, defense:"输出连通分量要对每个未访问顶点重新启动 DFS/BFS。"}
+  ];
+}
+function renderComponentGraph(el, step) {
+  el.innerHTML=`<div class="svgWrap"><svg viewBox="0 0 650 240" width="650">${step.edges.map(([a,b])=>`<line class="edge" x1="${step.pos[a][0]}" y1="${step.pos[a][1]}" x2="${step.pos[b][0]}" y2="${step.pos[b][1]}"/>`).join("")}${Object.entries(step.pos).map(([n,[x,y]])=>`<g class="node ${step.active.includes(Number(n))?'active':step.done.includes(Number(n))?'done':''}"><circle cx="${x}" cy="${y}" r="27"/><text x="${x}" y="${y}">${n}</text></g>`).join("")}</svg></div><div class="row">${(step.comps||[]).map((c,i)=>`<div class="cell done">分量${i+1}: ${c.join('-')}</div>`).join("")}</div>`;
+}
+
+function buildMatrixToListSteps() {
+  const mat=[[0,1,1,0],[1,0,0,1],[1,0,0,0],[0,1,0,0]];
+  const adj=[[],[],[],[]], steps=[{text:"从邻接矩阵第 0 行开始扫描，遇到 1 就把列号加入该顶点邻接表。", mat, adj:adj.map(a=>a.slice()), active:[0,0]}];
+  for(let i=0;i<mat.length;i++) for(let j=0;j<mat.length;j++) if(mat[i][j]){ adj[i].push(j); steps.push({text:`matrix[${i}][${j}]=1，所以把 ${j} 加入 adj[${i}]。`, mat, adj:adj.map(a=>a.slice()), active:[i,j], state:{当前:`${i},${j}`}}); }
+  steps.push({text:"转换完成。矩阵扫描耗时 O(V²)，邻接表最终只保存真实边。", mat, adj, active:null, defense:"无向图矩阵对称，所以转换后每条无向边会出现在两个邻接表中。"});
+  return steps;
+}
+function renderMatrixToList(el, step) { renderMatrix(el, {mat:step.mat}); el.innerHTML += `<div class="adjListDiagram">${step.adj.map((list,i)=>`<div class="adjListRow"><div class="cell active">顶点 ${i}</div><div class="adjListNeighbors">${list.map(v=>`<div class="token">${v}</div>`).join("")||'<span class="formula">空</span>'}</div></div>`).join("")}</div>`; }
+
+function buildAoeSteps() {
+  const pos={0:[80,170],1:[220,90],2:[220,250],3:[390,90],4:[390,250],5:[550,170]};
+  const edges=[[0,1,3],[0,2,2],[1,3,2],[2,3,4],[2,4,3],[3,5,2],[4,5,3]];
+  return [
+    {text:"AOE 网中，顶点表示事件，边表示活动及持续时间。先按拓扑序计算事件最早发生时间 ve。", pos, edges, active:[0], critical:[], ve:[0,0,0,0,0,0], vl:[], state:{任务:"正向求 ve"}},
+    {text:"从 0 出发：ve[1]=3，ve[2]=2。", pos, edges, active:[1,2], critical:[[0,1],[0,2]], ve:[0,3,2,0,0,0], vl:[], state:{更新:"ve[1]=3, ve[2]=2"}},
+    {text:"继续正向更新：ve[3]=max(3+2,2+4)=6，ve[4]=2+3=5，ve[5]=max(6+2,5+3)=8。", pos, edges, active:[3,4,5], critical:[[2,3],[3,5],[4,5]], ve:[0,3,2,6,5,8], vl:[], state:{ve:"0,3,2,6,5,8"}},
+    {text:"逆拓扑计算 vl：终点 vl[5]=ve[5]=8，再向前取最小允许时间。", pos, edges, active:[5], critical:[], ve:[0,3,2,6,5,8], vl:[0,4,2,6,5,8], state:{vl:"0,4,2,6,5,8"}},
+    {text:"活动最早开始 e=ve[u]，最迟开始 l=vl[v]-w。e==l 的活动是关键活动，组成关键路径。", pos, edges, active:[0,2,3,5], critical:[[0,2],[2,3],[3,5]], ve:[0,3,2,6,5,8], vl:[0,4,2,6,5,8], state:{关键路径:"0->2->3->5"}, defense:"关键路径长度决定工程最短工期，关键活动延误会直接拖延总工期。"}
+  ];
+}
+function renderAoe(el, step) {
+  const isCrit=(a,b)=>step.critical?.some(e=>e[0]===a&&e[1]===b);
+  el.innerHTML=`<div class="svgWrap"><svg viewBox="0 0 650 330" width="680"><defs><marker id="aoeArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8a9ba3"/></marker></defs>${step.edges.map(([a,b,w])=>`<line class="edge ${isCrit(a,b)?'active':''}" marker-end="url(#aoeArrow)" x1="${step.pos[a][0]}" y1="${step.pos[a][1]}" x2="${step.pos[b][0]}" y2="${step.pos[b][1]}"/>${edgeWeightLabel({x:step.pos[a][0],y:step.pos[a][1]},{x:step.pos[b][0],y:step.pos[b][1]},w,18)}`).join("")}${Object.entries(step.pos).map(([n,[x,y]])=>`<g class="node ${step.active.includes(Number(n))?'active':''}"><circle cx="${x}" cy="${y}" r="27"/><text x="${x}" y="${y}">${n}</text></g>`).join("")}</svg></div><div class="row">${(step.ve||[]).map((v,i)=>`<div class="cell done">ve${i}=${v}</div>`).join("")}</div>${step.vl?.length?`<div class="row">${step.vl.map((v,i)=>`<div class="cell active">vl${i}=${v}</div>`).join("")}</div>`:""}`;
+}
+
+function buildBinaryDecisionTreeSteps() {
+  const t={key:4,left:{key:2,left:{key:1},right:{key:3}},right:{key:6,left:{key:5},right:{key:7}}};
+  return [
+    {text:"对 1..7 做二分查找，第一次比较 mid=4，所以 4 是判定树根。", tree:t, active:[4], state:{第1层:"4"}},
+    {text:"若目标小于 4，就进入左半区 1..3，下一次比较 2；若大于 4，就进入右半区 5..7，比较 6。", tree:t, active:[2,6], state:{第2层:"2,6"}},
+    {text:"叶子 1、3、5、7 是第三层，表示最多比较 3 次。查找长度就是命中结点所在层数。", tree:t, active:[1,3,5,7], state:{最多比较次数:3}, defense:"二分查找判定树近似平衡，所以查找复杂度 O(log n)。"}
+  ];
+}
+function renderDecisionTree(el, step) { el.innerHTML = renderTreeSvg(step.tree, step.active||[]); }
+
+function buildBstDeleteSteps() {
+  const before=buildBst([50,30,70,20,40,60,80,35,45]);
+  const replaced=buildBst([50,35,70,20,40,60,80,45]);
+  return [
+    {text:"准备删除 BST 中的 30。先按 BST 查找规则：30 小于 50，走左，找到 30。", tree:before, active:[50,30], state:{目标:30}},
+    {text:"30 有两个孩子，不能简单断开。常用做法是找右子树中最小结点，也就是中序后继 35。", tree:before, active:[30,35], state:{后继:35}},
+    {text:"用 35 覆盖 30 的关键字，相当于把要删除的问题转移到原来 35 的位置。", tree:replaced, active:[35], state:{替换:"30 <- 35"}},
+    {text:"删除原 35 结点，BST 中序序列仍然保持递增。", tree:replaced, active:[35], state:{完成:"删除 30"}, defense:"BST 删除分三类：叶子直接删，单孩子用孩子顶上，双孩子用前驱或后继替代。"}
+  ];
+}
+
+function buildBstAslSteps() {
+  const tree=buildBst([50,30,70,20,40,60,80]);
+  return [
+    {text:"ASL 是平均查找长度，BST 中每个结点的成功查找次数等于它所在层数。", tree, active:[50], depths:{50:1}, state:{根结点比较次数:1}},
+    {text:"第二层 30、70 需要比较 2 次。", tree, active:[30,70], depths:{50:1,30:2,70:2}, state:{第二层:"2+2"}},
+    {text:"第三层 20、40、60、80 各需要比较 3 次。", tree, active:[20,40,60,80], depths:{50:1,30:2,70:2,20:3,40:3,60:3,80:3}, state:{第三层:"3*4"}},
+    {text:"ASL=(1+2+2+3+3+3+3)/7=17/7。", tree, active:[], depths:{50:1,30:2,70:2,20:3,40:3,60:3,80:3}, state:{ASL:"17/7"}, defense:"树越平衡，平均查找长度越小；退化成链表时 ASL 会明显变大。"}
+  ];
+}
+function renderBstAsl(el, step) { el.innerHTML = renderTreeSvg(step.tree, step.active||[]) + `<div class="row">${Object.entries(step.depths||{}).map(([k,d])=>`<div class="cell ${step.active?.includes(Number(k))?'active':'done'}">${k}: ${d}次</div>`).join("")}</div>`; }
+
+function buildHashAslSteps() {
+  const keys=[19,14,23,1,68], m=7, table=Array(m).fill(""), probes={};
+  const steps=[];
+  keys.forEach(k=>{ let pos=k%m, c=1; while(table[pos]!==""){ pos=(pos+1)%m; c++; } table[pos]=k; probes[k]=c; });
+  steps.push({text:"先按 H(key)=key%7 和线性探测构造散列表。", table:table.slice(), active:[], probes, state:{表长:m}});
+  for(const k of keys){ steps.push({text:`成功查找 ${k} 需要 ${probes[k]} 次探测。`, table:table.slice(), active:[table.indexOf(k)], probes, state:{key:k, 成功探测次数:probes[k]}}); }
+  const success=keys.reduce((s,k)=>s+probes[k],0)/keys.length;
+  steps.push({text:`成功 ASL = (${keys.map(k=>probes[k]).join("+")})/${keys.length} = ${success.toFixed(2)}。`, table:table.slice(), active:[], probes, state:{成功ASL:success.toFixed(2)}});
+  steps.push({text:"失败 ASL 要统计每个可能初始地址查到空位需要几次探测，不能和成功 ASL 混算。", table:table.slice(), active:[], probes, state:{失败ASL:"按空位探测路径统计"}, defense:"散列表题一定先写哈希函数和冲突处理规则，再逐个数探测次数。"});
+  return steps;
+}
+function renderHashAsl(el, step) { el.innerHTML = `<div class="row">${step.table.map((v,i)=>`<div><div class="cell ${step.active?.includes(i)?'active':v!==''?'done':''}">${v||'空'}</div><div class="index">${i}</div></div>`).join("")}</div><div class="row">${Object.entries(step.probes||{}).map(([k,c])=>`<div class="cell done">${k}: ${c}次</div>`).join("")}</div>`; }
+function buildLinkedSplitSteps() {
+  const values=[3,-1,4,-5,2,-2,7];
+  const steps=[]; const positive=[], negative=[];
+  steps.push({text:"准备把链表按正数/负数拆成两条链。为了保持原相对顺序，两条结果链都使用尾插法。", values, positive:[], negative:[], active:null, state:{规则:"正数进 A，负数进 B"}});
+  values.forEach((v,i)=>{
+    if(v>=0){ positive.push(v); steps.push({text:`结点 ${v} 满足非负条件，接到 A 链尾部，tailA 后移。`, values, positive:positive.slice(), negative:negative.slice(), active:i, state:{当前:v, 去向:"A 链"}}); }
+    else { negative.push(v); steps.push({text:`结点 ${v} 为负数，接到 B 链尾部，tailB 后移。`, values, positive:positive.slice(), negative:negative.slice(), active:i, state:{当前:v, 去向:"B 链"}}); }
+  });
+  steps.push({text:"扫描结束，A/B 两条链都要把尾结点 next 置空，防止拖着原链旧后继。", values, positive, negative, active:null, state:{A:positive.join("->"), B:negative.join("->")}, defense:"链表拆分最怕丢后继：处理当前结点前要先保存 next。"});
+  return steps;
+}
+function renderSplitList(el, step) {
+  const source = `<div><div class="label">原链表</div><div class="row">${step.values.map((v,i)=>`<div class="cell ${i===step.active?'active':''}">${v}</div>`).join('<span class="formula">→</span>')}</div></div>`;
+  const a = `<div><div class="label">A 链（非负）</div><div class="row">${(step.positive||[]).map(v=>`<div class="cell done">${v}</div>`).join('<span class="formula">→</span>') || '<span class="formula">空</span>'}</div></div>`;
+  const b = `<div><div class="label">B 链（负数）</div><div class="row">${(step.negative||[]).map(v=>`<div class="cell active">${v}</div>`).join('<span class="formula">→</span>') || '<span class="formula">空</span>'}</div></div>`;
+  el.innerHTML = source + a + b;
+}
+function buildLinkedInsertionSortSteps() {
+  const input=[4,1,5,2,3], sorted=[], rest=input.slice(), steps=[];
+  steps.push({text:"从原链表取结点，逐个插入到 sorted 有序链表中。", sorted:[], rest:rest.slice(), active:null});
+  while(rest.length){
+    const x=rest.shift(); let pos=0; while(pos<sorted.length && sorted[pos]<x) pos++;
+    steps.push({text:`摘下结点 ${x}，在 sorted 中寻找第一个大于它的位置。`, sorted:sorted.slice(), rest:rest.slice(), active:x, state:{当前:x, 插入位置:pos}});
+    sorted.splice(pos,0,x);
+    steps.push({text:`把 ${x} 插入 sorted 的第 ${pos} 个位置，sorted 仍保持递增。`, sorted:sorted.slice(), rest:rest.slice(), active:x, state:{sorted:sorted.join("->")}});
+  }
+  steps.push({text:"未处理链表为空，链表递增排序完成。", sorted:sorted.slice(), rest:[], active:null, state:{结果:sorted.join("->")}, defense:"链表插入排序靠改指针接入结点，不需要像顺序表那样整体右移。"});
+  return steps;
+}
+function renderLinkedSort(el, step) {
+  const row = (name, arr, cls) => `<div><div class="label">${name}</div><div class="row">${arr.map(v=>`<div class="cell ${v===step.active?'active':cls}">${v}</div>`).join('<span class="formula">→</span>') || '<span class="formula">空</span>'}</div></div>`;
+  el.innerHTML = row("sorted 有序链", step.sorted||[], "done") + row("未处理链", step.rest||[], "");
+}
+function buildDoubleListDeleteSteps() {
+  const values=["A","B","C","D"];
+  return [
+    {text:"双链表准备删除结点 C。先找到 C 的前驱 B 和后继 D。", values, active:2, pre:1, next:3, state:{p:"C", pre:"B", next:"D"}},
+    {text:"执行 B->next = D，让前向链绕过 C。", values, active:2, pre:1, next:3, state:{语句:"p->prior->next = p->next"}},
+    {text:"执行 D->prior = B，让后向链也绕过 C。", values, active:2, pre:1, next:3, state:{语句:"p->next->prior = p->prior"}},
+    {text:"释放 C，双链表删除完成。", values:["A","B","D"], active:-1, pre:1, next:2, state:{结果:"A<->B<->D"}, defense:"双链表删除必须同时维护 next 和 prior 两个方向。"}
+  ];
+}
+function renderDoubleListDelete(el, step) {
+  el.innerHTML = `<div class="row">${step.values.map((v,i)=>`<div><div class="cell ${i===step.active?'bad':i===step.pre||i===step.next?'active':''}">${v}</div><div class="index">${i}</div></div>${i<step.values.length-1?'<span class="formula">⇄</span>':''}`).join("")}</div><div class="formula">删除 p：p->prior->next=p->next；p->next->prior=p->prior。</div>`;
+}
+function buildLinkedQueueEnqueueSteps() {
+  return [
+    {text:"带头结点链队初始为空，front 和 rear 都指向头结点。", queue:[], front:"head", rear:"head", active:null, state:{状态:"空队"}},
+    {text:"入队 A：创建新结点 s，让 rear->next=s。", queue:["A"], front:"head", rear:"head", active:"A", state:{新结点:"A", 第一步:"rear->next=s"}},
+    {text:"再让 rear=s，队尾指针移动到 A。", queue:["A"], front:"head", rear:"A", active:"A", state:{第二步:"rear=s"}},
+    {text:"继续入队 B，同样先接到 rear->next，再移动 rear。", queue:["A","B"], front:"head", rear:"B", active:"B", state:{队列:"A,B"}},
+    {text:"链队入队完成。front 负责出队端，rear 负责入队端。", queue:["A","B"], front:"head", rear:"B", active:null, defense:"若最后一个元素出队，rear 要重新指向 front，表示空队。"}
+  ];
+}
+function renderLinkedQueue(el, step) {
+  el.innerHTML = `<div class="row"><div class="cell done">head</div>${(step.queue||[]).map(v=>`<span class="formula">→</span><div class="cell ${v===step.active?'active':''}">${v}${v===step.rear?' rear':''}</div>`).join("")}</div><div class="formula">front=${step.front}，rear=${step.rear}</div>`;
+}
+function buildArrayPartitionSteps() {
+  const steps=[]; let arr=[3,-1,4,-5,2,-2,7];
+  steps.push({text:"目标：把非负数放左边，负数放右边。左右指针分别从两端向中间扫描。", arr:arr.slice(), active:[0,arr.length-1], state:{i:0,j:arr.length-1}});
+  steps.push({text:"i=0 的 3 已经属于左区，i 右移；j=6 的 7 不属于右区，等待交换。", arr:arr.slice(), active:[1,6], state:{i:1,j:6}});
+  [arr[1],arr[6]]=[arr[6],arr[1]];
+  steps.push({text:"A[1] 是负数、A[6] 是非负数，交换它们。", arr:arr.slice(), active:[1,6], state:{交换:"-1 和 7"}});
+  steps.push({text:"继续扫描：3、7、4 都属于左区，i 移到 3；右侧 -1、-2 属于右区，j 移到 4。", arr:arr.slice(), active:[3,4], state:{i:3,j:4}});
+  [arr[3],arr[4]]=[arr[4],arr[3]];
+  steps.push({text:"A[3] 是负数、A[4] 是非负数，再交换。", arr:arr.slice(), active:[3,4], state:{交换:"-5 和 2"}});
+  steps.push({text:"指针相遇，分区完成：左边都是非负数，右边都是负数；区内不保证有序。", arr:arr.slice(), done:[0,1,2,3,4,5,6], state:{结果:arr.join(",")}, defense:"分区不是完整排序，只保证满足条件的元素被分到两侧。"});
+  return steps;
+}
+function buildLevelOrderLeavesSteps() {
+  const children={A:["B","C"],B:["D","E"],C:["F","G"],D:["H","I"],E:["J","K"],F:["L","M"],G:["N","O"]};
+  const queue=["A"], leaves=[], steps=[{text:"根 A 入队。层序遍历用队列从上到下处理结点。", tree:letterTree(), queue:queue.slice(), leaves:[], active:["A"], state:{队列:"A"}}];
+  while(queue.length){ const x=queue.shift(); const cs=children[x]||[]; if(cs.length===0){ leaves.push(x); steps.push({text:`${x} 没有左右孩子，是叶子，输出到叶子序列。`, tree:letterTree(), queue:queue.slice(), leaves:leaves.slice(), active:[x], state:{叶子输出:leaves.join(" ")}}); } else { queue.push(...cs); steps.push({text:`${x} 不是叶子，把它的孩子 ${cs.join("、")} 入队。`, tree:letterTree(), queue:queue.slice(), leaves:leaves.slice(), active:[x].concat(cs), state:{入队:cs.join(","), 队列:queue.join(" ")}}); } }
+  steps.push({text:`队列为空，层序叶子输出完成：${leaves.join(" ")}。`, tree:letterTree(), queue:[], leaves, active:leaves, state:{结果:leaves.join(" ")}, defense:"层序遍历的核心是队列；叶子判断是左右孩子都为空。"});
+  return steps;
+}
+function renderLevelOrderLeaves(el, step) {
+  el.innerHTML = renderTreeSvg(step.tree, step.active||[]) + `<div><div class="label">队列</div><div class="stackQueue">${(step.queue||[]).map(x=>`<div class="token">${x}</div>`).join("")||'<span class="formula">空</span>'}</div></div><div><div class="label">叶子输出</div><div class="stackQueue">${(step.leaves||[]).map(x=>`<div class="token done">${x}</div>`).join("")||'<span class="formula">暂无</span>'}</div></div>`;
+}
+function buildDeleteVertexConnectivitySteps() {
+  const pos={0:[90,120],1:[220,120],2:[350,60],3:[350,180],4:[500,120]};
+  const edges=[[0,1],[1,2],[1,3],[2,4],[3,4]], del=1;
+  return [
+    {text:"原图连通。现在假设删除顶点 1，所有与 1 相连的边也不能再使用。", pos, edges, del, active:[1], done:[], state:{删除顶点:1}},
+    {text:"从剩余顶点 0 开始 DFS。由于 0 只连着被删除的 1，所以无法继续访问其他顶点。", pos, edges, del, active:[0], done:[0], state:{起点:0, 已访问:"0"}},
+    {text:"检查剩余顶点发现 2、3、4 都未访问，因此删除 1 后图不连通。", pos, edges, del, active:[2,3,4], done:[0], state:{结论:"不连通"}, defense:"删点连通性判断要跳过被删除顶点及其所有关联边。"}
+  ];
+}
+function renderDeleteVertexGraph(el, step) {
+  const del=String(step.del); const active=new Set((step.active||[]).map(String)); const done=new Set((step.done||[]).map(String));
+  el.innerHTML=`<div class="svgWrap"><svg viewBox="0 0 620 260" width="640">${step.edges.map(([a,b])=>`<line class="edge ${a===step.del||b===step.del?'bad':''}" x1="${step.pos[a][0]}" y1="${step.pos[a][1]}" x2="${step.pos[b][0]}" y2="${step.pos[b][1]}"/>`).join("")}${Object.entries(step.pos).map(([n,[x,y]])=>`<g class="node ${n===del?'bad':active.has(n)?'active':done.has(n)?'done':''}"><circle cx="${x}" cy="${y}" r="27"/><text x="${x}" y="${y}">${n}</text></g>`).join("")}</svg></div><div class="formula">红色顶点 ${step.del} 已删除，遍历不能经过它。</div>`;
+}
+function buildSequentialAslSteps() {
+  const arr=[11,22,33,44,55], counts=[];
+  const steps=[{text:"顺序查找成功 ASL：第 i 个元素要比较 i+1 次。先列出每个元素的比较次数。", arr, active:[], counts:[], state:{公式:"ASL=ΣPiCi"}}];
+  arr.forEach((v,i)=>{ counts.push(i+1); steps.push({text:`查找 ${v} 时，需要依次比较到下标 ${i}，共 ${i+1} 次。`, arr, active:[i], counts:counts.slice(), state:{关键字:v, 比较次数:i+1}}); });
+  steps.push({text:"等概率成功 ASL=(1+2+3+4+5)/5=3。", arr, active:[], counts, state:{成功ASL:3}, defense:"成功 ASL 与失败 ASL 要分开统计；若概率不同要做加权平均。"});
+  return steps;
+}
+function renderSequentialAsl(el, step) {
+  el.innerHTML = `<div class="row">${step.arr.map((v,i)=>`<div><div class="cell ${(step.active||[]).includes(i)?'active':''}">${v}</div><div class="index">C=${i+1}</div></div>`).join("")}</div><div class="row">${(step.counts||[]).map(c=>`<div class="cell done">${c}次</div>`).join("")}</div>`;
+}function clone(x) { return x.map(r => r.slice()); }
 function range(a,b) { const out=[]; for(let i=a;i<=b;i++) if(i>=0) out.push(i); return out; }
 
 function init() {
@@ -2140,6 +2708,7 @@ function init() {
   $("codeFab").addEventListener("click", () => {
     $("codePanel").classList.add("open");
     $("codePanel").setAttribute("aria-hidden", "false");
+    positionCodePanel();
   });
   $("codeClose").addEventListener("click", () => {
     $("codePanel").classList.remove("open");
@@ -2152,4 +2721,10 @@ function init() {
 }
 
 init();
+
+
+
+
+
+
 
