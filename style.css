@@ -373,6 +373,37 @@ button:hover { border-color: var(--accent); color: var(--accent); transform: tra
 .visualPanel[data-algo="bucket"] .visual > * {
   transform: scale(1.1);
 }
+
+.visualPanel[data-algo="adjList"] .visual {
+  place-content: start center;
+  align-content: start;
+  justify-content: center;
+  overflow-y: auto;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.adjListDiagram {
+  display: grid;
+  gap: 10px;
+  width: min(680px, 100%);
+  margin: 0 auto;
+}
+
+.adjListRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.adjListNeighbors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
 .explainPanel {
   padding: 12px 14px;
   overflow: hidden;
