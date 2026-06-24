@@ -45,6 +45,12 @@ const graph = {
 
 const simState = {
   arrayText: "12,5,4,9,5",
+  sortArrays: {
+    insertion: "12,5,4,9,5",
+    shell: "12,5,4,9,5",
+    bubble: "12,5,4,9,5",
+    selection: "12,5,4,9,5"
+  },
   binaryArrayText: "3,8,12,18,25,31,39,42,56",
   binaryTarget: 42,
   hashText: "19,14,23,1,68",
@@ -56,6 +62,14 @@ const simState = {
   avlInsert: 5
 };
 
+function getSortArrayText(id) {
+  return (simState.sortArrays && simState.sortArrays[id]) || simState.arrayText;
+}
+
+function setSortArrayText(id, value) {
+  if (!simState.sortArrays) simState.sortArrays = {};
+  simState.sortArrays[id] = value;
+}
 const codes = {
   buildTree: `void createBiTree(BiNode*& T, char a[100][3], int n, int& i) {
     if (i >= n) return;
@@ -276,11 +290,11 @@ const algorithms = [
   { id: "bst", page: 26, group: "查找", title: "BST 二叉排序树探索", subtitle: "自己输入数，观察插入和查找路径", complexity: "平均 O(log n)，最坏 O(n)", build: buildBstSteps, render: renderBst, code: codes.bst, params: "bst" },
   { id: "avl", page: 27, group: "查找", title: "AVL 平衡二叉树探索", subtitle: "插入后自动检查平衡并旋转", complexity: "O(log n)", build: buildAvlSteps, render: renderAvl, code: codes.avl, params: "avl" },
   { id: "hash", page: 28, group: "查找", title: "哈希表冲突处理", subtitle: "线性探测与链地址法对照", complexity: "平均 O(1)", build: buildHashSteps, render: renderHash, code: codes.hash },
-  { id: "insertion", page: 29, group: "排序", title: "直接插入排序", subtitle: "输入数组，观察逐个插入", complexity: "O(n²)", build: () => buildInsertionSteps(parseNums(simState.arrayText)), render: renderArraySort, code: codes.insertion, params: "array" },
-  { id: "shell", page: 29, group: "排序", title: "希尔排序", subtitle: "按增量分组插入", complexity: "依增量而定", build: buildShellSteps, render: renderArraySort, code: codes.insertion },
-  { id: "bubble", page: 29, group: "排序", title: "冒泡排序", subtitle: "输入数组，观察相邻交换", complexity: "O(n²)", build: () => buildBubbleSteps(parseNums(simState.arrayText)), render: renderArraySort, code: codes.bubble, params: "array" },
+  { id: "insertion", page: 29, group: "排序", title: "直接插入排序", subtitle: "输入数组，观察逐个插入", complexity: "O(n²)", build: () => buildInsertionSteps(parseNums(getSortArrayText("insertion"))), render: renderArraySort, code: codes.insertion, params: "array" },
+  { id: "shell", page: 29, group: "排序", title: "希尔排序", subtitle: "按增量分组插入", complexity: "依增量而定", build: () => buildShellSteps(parseNums(getSortArrayText("shell"))), render: renderArraySort, code: codes.insertion, params: "array" },
+  { id: "bubble", page: 29, group: "排序", title: "冒泡排序", subtitle: "输入数组，观察相邻交换", complexity: "O(n²)", build: () => buildBubbleSteps(parseNums(getSortArrayText("bubble"))), render: renderArraySort, code: codes.bubble, params: "array" },
   { id: "quick", page: 29, group: "排序", title: "快速排序一趟划分", subtitle: "pivot 归位，左右分区", complexity: "平均 O(n log n)", build: () => buildQuickSteps([12,5,4,19,8,21,15]), render: renderArraySort, code: codes.quick },
-  { id: "selection", page: 29, group: "排序", title: "直接选择排序", subtitle: "每趟选最小放前面", complexity: "O(n²)", build: buildSelectionSteps, render: renderArraySort, code: codes.insertion },
+  { id: "selection", page: 29, group: "排序", title: "直接选择排序", subtitle: "每趟选最小放前面", complexity: "O(n²)", build: () => buildSelectionSteps(parseNums(getSortArrayText("selection"))), render: renderArraySort, code: codes.insertion, params: "array" },
   { id: "heap", page: 29, group: "排序", title: "堆排序", subtitle: "大根堆反复取最大", complexity: "O(n log n)", build: () => buildHeapSteps([50,30,70,20,40,60,80,10,25,35,45,55,65,75,85]), render: renderHeap, code: codes.insertion },
   { id: "merge", page: 29, group: "排序", title: "归并排序合并", subtitle: "两个有序表合成一个有序表", complexity: "O(n log n)", build: buildMergeSteps, render: renderMerge, code: codes.merge },
   { id: "counting", page: 29, group: "排序", title: "计数排序", subtitle: "统计每个值出现次数", complexity: "O(n+k)", build: buildCountingSteps, render: renderCounting, code: codes.hash },
@@ -531,12 +545,12 @@ function renderParams() {
   if (current.params === "array") {
     panel.innerHTML = `
       <label class="paramGroup">数组
-        <input id="arrayParam" value="${escapeHtml(simState.arrayText)}" />
+        <input id="arrayParam" value="${escapeHtml(getSortArrayText(current.id))}" />
       </label>
       <button id="arrayApply">用这个数组重建动画</button>
       <span class="paramNote">用逗号或空格分隔，例如 12,5,4,9,5</span>`;
     $("arrayApply").onclick = () => {
-      simState.arrayText = $("arrayParam").value;
+      setSortArrayText(current.id, $("arrayParam").value);
       rebuildFromParams();
     };
     return;
@@ -1672,8 +1686,8 @@ function renderMerge(el, step) {
   el.innerHTML = row("左有序表", step.left, step.active==="left") + row("右有序表", step.right, step.active==="right") + row("合并结果", step.merged, true);
 }
 
-function buildShellSteps() {
-  const a = parseNums(simState.arrayText);
+function buildShellSteps(seed) {
+  const a = (seed && seed.length ? seed : parseNums(getSortArrayText("shell")));
   const steps = [{ text:"初始数组。希尔排序先用较大的 gap 粗略调整，再逐步缩小 gap。", arr:a.slice(), active:[], done:[], state:{gap:"尚未开始"}, lines:[1] }];
   for (let gap = Math.floor(a.length / 2); gap >= 1; gap = Math.floor(gap / 2)) {
     steps.push({ text:`本轮 gap=${gap}：下标相差 ${gap} 的元素属于同一组，在组内做插入排序。`, arr:a.slice(), active:[], done:[], gap, state:{gap}, lines:[2,3] });
@@ -1695,8 +1709,8 @@ function buildShellSteps() {
   return steps;
 }
 
-function buildSelectionSteps() {
-  const a = parseNums(simState.arrayText);
+function buildSelectionSteps(seed) {
+  const a = (seed && seed.length ? seed : parseNums(getSortArrayText("selection")));
   const steps = [{ text:"初始数组。选择排序每一趟从未排序区选最小值，放到未排序区最前面。", arr:a.slice(), active:[], done:[], lines:[1] }];
   for (let i = 0; i < a.length - 1; i++) {
     let min = i;
