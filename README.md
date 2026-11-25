@@ -8,3 +8,15 @@
 包含线性表、栈与队列、递归、树、图、查找和排序等 69 个演示。支持播放、单步、回退、代码展示、变量状态和知识讲解；部分页面提供自定义输入。
 
 作者：Cynthia Wang
+
+## 使用指南
+
+![模拟器功能概览](docs/guide-pages/page-1.png)
+
+![界面导航与动画控制](docs/guide-pages/page-2.png)
+
+![代码展示与阅读说明](docs/guide-pages/page-3.png)
+
+![自定义输入与交互演示](docs/guide-pages/page-4.png)
+
+![知识讲解与学习自检](docs/guide-pages/page-5.png)
